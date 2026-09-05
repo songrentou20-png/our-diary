@@ -227,15 +227,16 @@ function renderCal(){
     const d=new Date(e.created_at);
     if(d.getFullYear()===calYear&&d.getMonth()===calMonth){
       const k=d.getDate();
-      if(!byDay[k])byDay[k]=e;
+      if(!byDay[k])byDay[k]=[];
+      byDay[k].push(e);
     }
   });
   for(let i=0;i<first;i++)grid.innerHTML+=`<div class="cal-cell empty"></div>`;
   for(let d=1;d<=days;d++){
     const isToday=today.getFullYear()===calYear&&today.getMonth()===calMonth&&today.getDate()===d;
-    const e=byDay[d];
-    const face=e&&e.mood?`<svg class="cal-face" viewBox="0 0 60 60">${MOODS.find(m=>m.id===e.mood)?.svg||''}</svg>`:'';
-    grid.innerHTML+=`<div class="cal-cell${isToday?' today':''}" onclick="openDay(${d})"><div class="cal-day">${d}</div>${face}</div>`;
+    const dayEs=byDay[d]||[];
+    const faces=dayEs.filter(e=>e.mood).map(e=>`<svg style="width:18px;height:18px" viewBox="0 0 60 60">${MOODS.find(m=>m.id===e.mood)?.svg||''}</svg>`).join('');
+    grid.innerHTML+=`<div class="cal-cell${isToday?' today':''}" onclick="openDay(${d})"><div class="cal-day">${d}</div>${faces?`<div style="display:flex;gap:1px;flex-wrap:wrap;justify-content:center">${faces}</div>`:''}</div>`;
   }
 }
 
