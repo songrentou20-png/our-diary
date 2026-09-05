@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="我们的日记">
+<link rel="apple-touch-icon" href="https://hxqllfmodimoxnwpudsn.supabase.co/storage/v1/object/public/stickers/chicu/Untitled%20folder/IMG_2812.jpeg">
+<title>我们的日记</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --bg: #F5F7FA; --surface: #FFFFFF; --border: #E8EBF0;
+    --text: #1A1D23; --text2: #6B7280; --text3: #9CA3AF;
+    --ji-bg: #EAF3FB; --ji-dot: #378ADD; --ji-text: #185FA5;
+    --si-bg: #FBF0F4; --si-dot: #D4537E; --si-text: #993556;
+    --accent: #378ADD; --radius: 14px;
+  }
+  body { font-family: -apple-system, "PingFang SC", "Helvetica Neue", Arial, sans-serif; background: var(--bg); min-height: 100vh; color: var(--text); }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 16px 20px 14px; position: sticky; top: 0; z-index: 100; }
+  .header-inner { display: flex; align-items: center; justify-content: space-between; max-width: 480px; margin: 0 auto; }
+  .header-title { font-size: 17px; font-weight: 600; }
+  .header-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .write-btn { width: 36px; height: 36px; background: var(--accent); border: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .write-btn svg { width: 18px; height: 18px; stroke: white; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .main { max-width: 480px; margin: 0 auto; padding: 16px 16px 100px; }
+  .loading-wrap { text-align: center; padding: 60px 0; color: var(--text3); font-size: 14px; }
+  .empty-wrap { text-align: center; padding: 60px 20px; }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-title { font-size: 16px; font-weight: 500; color: var(--text2); }
+  .empty-sub { font-size: 14px; color: var(--text3); margin-top: 6px; line-height: 1.6; }
+  .entries { display: flex; flex-direction: column; gap: 12px; }
+  .entry { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; }
+  .entry-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-ji { background: var(--ji-dot); }
+  .dot-si { background: var(--si-dot); }
+  .author { font-size: 13px; font-weight: 600; }
+  .author-ji { color: var(--ji-text); }
+  .author-si { color: var(--si-text); }
+  .entry-date { font-size: 12px; color: var(--text3); }
+  .edit-btn { margin-left: auto; background: none; border: none; font-size: 13px; color: var(--text3); cursor: pointer; padding: 2px 6px; border-radius: 6px; }
+  .edit-btn:hover { background: var(--bg); color: var(--text2); }
+  .entry-body { font-size: 15px; line-height: 1.75; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .entry-body.clamp { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .expand-btn { margin-top: 8px; font-size: 13px; color: var(--accent); background: none; border: none; padding: 0; cursor: pointer; }
+  .edit-area { width: 100%; border: 1.5px solid var(--accent); border-radius: 10px; padding: 12px; font-size: 15px; line-height: 1.75; color: var(--text); background: var(--bg); resize: none; min-height: 100px; font-family: inherit; margin-top: 8px; outline: none; }
+  .edit-actions { display: flex; gap: 8px; margin-top: 10px; justify-content: flex-end; }
+  .btn-sm-cancel { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 7px 14px; font-size: 14px; cursor: pointer; color: var(--text2); }
+  .btn-sm-save { background: var(--accent); border: none; border-radius: 8px; padding: 7px 14px; font-size: 14px; font-weight: 600; cursor: pointer; color: white; }
+  .btn-sm-save:disabled { opacity: 0.4; }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .overlay.show { opacity: 1; pointer-events: all; }
+  .form-sheet { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px 40px; transform: translateY(100%); transition: transform 0.25s cubic-bezier(.4,0,.2,1); max-height: 85vh; overflow-y: auto; }
+  .overlay.show .form-sheet { transform: translateY(0); }
+  .sheet-handle { width: 36px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+  .sheet-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .author-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .pick-btn { padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--bg); font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.15s; color: var(--text2); }
+  .pick-btn.ji.active { background: var(--ji-bg); border-color: var(--ji-dot); color: var(--ji-text); }
+  .pick-btn.si.active { background: var(--si-bg); border-color: var(--si-dot); color: var(--si-text); }
+  textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 10px; padding: 14px; font-size: 15px; line-height: 1.75; color: var(--text); background: var(--bg); resize: none; min-height: 140px; font-family: inherit; margin-bottom: 14px; outline: none; transition: border-color 0.15s; }
+  textarea:focus { border-color: var(--accent); background: var(--surface); }
+  .form-btns { display: flex; gap: 10px; }
+  .btn-cancel { flex: 1; padding: 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 15px; cursor: pointer; color: var(--text2); }
+  .btn-save { flex: 2; padding: 14px; background: var(--accent); border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; color: white; transition: opacity 0.15s; }
+  .btn-save:disabled { opacity: 0.4; cursor: default; }
+  .toast { position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%); background: #1A1D23; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; z-index: 300; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <div class="header-title">我们的日记</div>
+      <div class="header-sub">霁 与 思涵</div>
+    </div>
+    <button class="write-btn" onclick="openForm()" aria-label="写日记">
+      <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    </button>
+  </div>
+</div>
+<div class="main" id="main"><div class="loading-wrap">加载中…</div></div>
+<div class="overlay" id="overlay" onclick="handleOverlayClick(event)">
+  <div class="form-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">写日记</div>
+    <div class="author-pick">
+      <button class="pick-btn ji active" id="pick-ji" onclick="setAuthor('ji')">✦ 霁</button>
+      <button class="pick-btn si" id="pick-si" onclick="setAuthor('sihan')">✿ 思涵</button>
+    </div>
+    <textarea id="ta" placeholder="今天想说什么…" oninput="onInput()"></textarea>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeForm()">取消</button>
+      <button class="btn-save" id="savebtn" onclick="saveEntry()" disabled>保存</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const SUPABASE_URL='https://hxqllfmodimoxnwpudsn.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4cWxsZm1vZGltb3hud3B1ZHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MzkwMzMsImV4cCI6MjEwNDExNTAzM30.GMVFdDvRZVZ_I4swazzRYFbv8RBT8TdgAt_nMay00OA';
+const API=SUPABASE_URL+'/rest/v1/diary_entries';
+const H={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
+let entries=[],author='ji',expanded=new Set(),editing=new Set(),saving=false;
+
+async function load(){
+  try{const r=await fetch(API+'?select=*&order=created_at.desc',{headers:H});entries=await r.json();if(!Array.isArray(entries))entries=[];}catch(e){entries=[];}
+  render();
+}
+
+function render(){
+  const el=document.getElementById('main');
+  if(!entries.length){el.innerHTML='<div class="empty-wrap"><div class="empty-icon">📖</div><div class="empty-title">还没有日记</div><div class="empty-sub">成为第一个写下来的人</div></div>';return;}
+  el.innerHTML='<div class="entries">'+entries.map(e=>{
+    const isJi=e.author==='ji';
+    const isEditing=editing.has(e.id);
+    const long=e.content.length>160||(e.content.match(/\n/g)||[]).length>3;
+    const exp=expanded.has(e.id);
+    if(isEditing){
+      return `<div class="entry">
+        <div class="entry-head">
+          <div class="dot ${isJi?'dot-ji':'dot-si'}"></div>
+          <span class="author ${isJi?'author-ji':'author-si'}">${isJi?'霁':'思涵'}</span>
+          <span class="entry-date">${fmt(e.created_at)}</span>
+        </div>
+        <textarea class="edit-area" id="ea_${e.id}" oninput="onEditInput(${e.id})">${escAttr(e.content)}</textarea>
+        <div class="edit-actions">
+          <button class="btn-sm-cancel" onclick="cancelEdit(${e.id})">取消</button>
+          <button class="btn-sm-save" id="esave_${e.id}" onclick="saveEdit(${e.id})">保存</button>
+        </div>
+      </div>`;
+    }
+    return `<div class="entry">
+      <div class="entry-head">
+        <div class="dot ${isJi?'dot-ji':'dot-si'}"></div>
+        <span class="author ${isJi?'author-ji':'author-si'}">${isJi?'霁':'思涵'}</span>
+        <span class="entry-date">${fmt(e.created_at)}</span>
+        <button class="edit-btn" onclick="startEdit(${e.id},event)">编辑</button>
+      </div>
+      <div class="entry-body ${long&&!exp?'clamp':''}">${esc(e.content)}</div>
+      ${long?`<button class="expand-btn" onclick="toggleExp(${e.id},event)">${exp?'收起':'展开'}</button>`:''}
+    </div>`;
+  }).join('')+'</div>';
+  entries.forEach(e=>{if(editing.has(e.id)){const ta=document.getElementById('ea_'+e.id);if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}}});
+}
+
+function fmt(iso){const d=new Date(iso);const p=n=>String(n).padStart(2,'0');return`${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escAttr(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function toggleExp(id,ev){ev.stopPropagation();expanded.has(id)?expanded.delete(id):expanded.add(id);render();}
+function startEdit(id,ev){ev.stopPropagation();editing.add(id);render();setTimeout(()=>{const ta=document.getElementById('ea_'+id);if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);}},50);}
+function cancelEdit(id){editing.delete(id);render();}
+function onEditInput(id){const ta=document.getElementById('ea_'+id);if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}}
+
+async function saveEdit(id){
+  const ta=document.getElementById('ea_'+id);
+  const btn=document.getElementById('esave_'+id);
+  if(!ta||!ta.value.trim())return;
+  btn.disabled=true;btn.textContent='保存中…';
+  try{
+    const r=await fetch(API+'?id=eq.'+id,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({content:ta.value.trim()})});
+    if(r.ok){editing.delete(id);showToast('已保存 ✓');await load();}
+    else{showToast('保存失败');btn.disabled=false;btn.textContent='保存';}
+  }catch(e){showToast('网络错误');btn.disabled=false;btn.textContent='保存';}
+}
+
+function openForm(){document.getElementById('overlay').classList.add('show');setTimeout(()=>document.getElementById('ta').focus(),300);}
+function closeForm(){document.getElementById('overlay').classList.remove('show');document.getElementById('ta').value='';document.getElementById('savebtn').disabled=true;}
+function handleOverlayClick(e){if(e.target===document.getElementById('overlay'))closeForm();}
+function setAuthor(a){author=a;document.getElementById('pick-ji').classList.toggle('active',a==='ji');document.getElementById('pick-si').classList.toggle('active',a==='sihan');}
+function onInput(){document.getElementById('savebtn').disabled=!document.getElementById('ta').value.trim();}
+
+async function saveEntry(){
+  if(saving)return;
+  const content=document.getElementById('ta').value.trim();
+  if(!content)return;
+  saving=true;document.getElementById('savebtn').disabled=true;document.getElementById('savebtn').textContent='保存中…';
+  try{
+    const r=await fetch(API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({author,content})});
+    if(r.ok){closeForm();showToast('已保存 ✓');await load();}
+    else showToast('保存失败，请重试');
+  }catch(e){showToast('网络错误，请重试');}
+  saving=false;document.getElementById('savebtn').disabled=false;document.getElementById('savebtn').textContent='保存';
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+load();
+</script>
+</body>
+</html>
