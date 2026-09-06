@@ -169,12 +169,57 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   <div class="cal-grid" id="cal-grid"></div>
 </div>
 
+<div id="page-cards" class="page">
+  <div style="padding:24px 20px 100px">
+    <div style="text-align:center;font-size:18px;font-weight:600;margin-bottom:24px;color:var(--text)">亲亲卡包 💌</div>
+    <div style="display:flex;gap:16px;justify-content:center;margin-bottom:32px">
+      <div style="flex:1;background:var(--surface);border-radius:20px;padding:20px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:8px">✦ 霁</div>
+        <div style="font-size:40px;font-weight:700;color:var(--accent)" id="ji-cards">0</div>
+        <div style="font-size:12px;color:var(--text3);margin:4px 0 12px">张亲亲卡</div>
+        <button onclick="redeemCard('ji')" style="background:var(--accent);color:white;border:none;border-radius:12px;padding:8px 16px;font-size:13px;cursor:pointer;width:100%">兑换亲亲 💋</button>
+      </div>
+      <div style="flex:1;background:var(--surface);border-radius:20px;padding:20px;text-align:center;border:1px solid var(--border)">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:8px">✿ 思涵</div>
+        <div style="font-size:40px;font-weight:700;color:var(--accent)" id="si-cards">0</div>
+        <div style="font-size:12px;color:var(--text3);margin:4px 0 12px">张亲亲卡</div>
+        <button onclick="redeemCard('sihan')" style="background:var(--accent);color:white;border:none;border-radius:12px;padding:8px 16px;font-size:13px;cursor:pointer;width:100%">兑换亲亲 💋</button>
+      </div>
+    </div>
+    <div style="background:var(--surface);border-radius:16px;padding:16px;border:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.8">
+      <div>💌 每日签到 → +1张卡</div>
+      <div>📝 写完日记 → +1张卡</div>
+      <div>💋 兑换亲亲 → -1张卡</div>
+    </div>
+    <div style="text-align:center;margin-top:20px">
+      <button onclick="triggerCheckin()" style="background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:12px;padding:10px 24px;font-size:14px;cursor:pointer">今日签到</button>
+    </div>
+  </div>
+</div>
+
+<!-- 签到弹窗 -->
+<div id="checkin-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
+  <div style="background:var(--bg);border-radius:24px;padding:28px 24px;width:80%;max-width:320px;text-align:center">
+    <div style="font-size:28px;margin-bottom:8px">💌</div>
+    <div style="font-size:17px;font-weight:600;margin-bottom:4px;color:var(--text)">今日签到</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:20px">签到得亲亲卡，积累可兑换亲亲</div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button id="ci-ji-btn" onclick="checkinAs('ji')" style="background:var(--accent);color:white;border:none;border-radius:14px;padding:12px;font-size:15px;cursor:pointer">✦ 霁 签到</button>
+      <button id="ci-si-btn" onclick="checkinAs('sihan')" style="background:var(--accent);color:white;border:none;border-radius:14px;padding:12px;font-size:15px;cursor:pointer">✿ 思涵 签到</button>
+      <button onclick="document.getElementById('checkin-modal').style.display='none'" style="background:transparent;border:none;color:var(--text3);font-size:14px;cursor:pointer;margin-top:4px">下次再说</button>
+    </div>
+  </div>
+</div>
+
 <div class="tab-bar" id="main-tabbar" style="display:none">
   <button class="tab-btn active" id="tab-diary" onclick="switchTab('diary')">
     <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>日记
   </button>
   <button class="tab-btn" id="tab-cal" onclick="switchTab('cal')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>日历
+  </button>
+  <button class="tab-btn" id="tab-cards" onclick="switchTab('cards')">
+    <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>卡包
   </button>
 </div>
 
@@ -239,6 +284,7 @@ function switchTab(tab){
   document.getElementById('page-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
   if(tab==='cal')renderCal();
+  if(tab==='cards')refreshCardsPage();
 }
 
 function buildMoodGrid(){
@@ -369,7 +415,7 @@ async function saveEntry(){
   saving=true;document.getElementById('savebtn').disabled=true;document.getElementById('savebtn').textContent='保存中…';
   try{const body={author,content};if(selectedMood)body.mood=selectedMood;
   const r=await fetch(API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify(body)});
-  if(r.ok){closeForm();showToast('已保存 ✓');await load();}else showToast('保存失败，请重试');}
+  if(r.ok){closeForm();showToast('已保存 ✓');await load();await addCardAfterDiary(author);showToast('写了日记，+1张亲亲卡 💌');}else showToast('保存失败，请重试');}
   catch(e){showToast('网络错误，请重试');}
   saving=false;document.getElementById('savebtn').disabled=false;document.getElementById('savebtn').textContent='保存';
 }
@@ -382,7 +428,7 @@ function pinInput(d){
       const ls=document.getElementById('lock-screen');if(ls)ls.style.display='none';
       const h=document.getElementById('main-header');if(h)h.style.display='';
       const tb=document.getElementById('main-tabbar');if(tb)tb.style.display='';
-      sessionStorage.setItem('unlocked','1');load();}
+      sessionStorage.setItem('unlocked','1');load();setTimeout(triggerCheckin,600);}
     else{document.getElementById('pin-err').textContent='密码错误，再试一次';setTimeout(()=>{pinVal='';updateDots();document.getElementById('pin-err').textContent='';},800);}
   }
 }
@@ -392,9 +438,93 @@ if(sessionStorage.getItem('unlocked')==='1'){
   const ls=document.getElementById('lock-screen');if(ls)ls.style.display='none';
   const h=document.getElementById('main-header');if(h)h.style.display='';
   const tb=document.getElementById('main-tabbar');if(tb)tb.style.display='';
-  load();
+  load();setTimeout(triggerCheckin,600);
 }
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+
+/* ====== 亲亲卡 API ====== */
+const CARDS_API=SB+'/rest/v1/kiss_cards';
+
+async function getCards(authorKey){
+  const r=await fetch(CARDS_API+'?author=eq.'+authorKey,{headers:H});
+  const d=await r.json();
+  return d[0]||null;
+}
+
+async function getAllCards(){
+  const r=await fetch(CARDS_API,{headers:H});
+  return await r.json();
+}
+
+function todayStr(){
+  return new Date().toLocaleDateString('sv-SE',{timeZone:'Europe/Rome'});
+}
+
+async function doCheckin(authorKey){
+  const today=todayStr();
+  const row=await getCards(authorKey);
+  if(row&&row.last_checkin_date===today)return false; // 今天已签到
+  const body={author:authorKey,cards:(row?row.cards:0)+1,last_checkin_date:today,updated_at:new Date().toISOString()};
+  await fetch(CARDS_API+'?on_conflict=author',{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)});
+  return true;
+}
+
+async function useCard(authorKey){
+  const row=await getCards(authorKey);
+  if(!row||row.cards<1)return false;
+  await fetch(CARDS_API+'?author=eq.'+authorKey,{method:'PATCH',headers:H,body:JSON.stringify({cards:row.cards-1,updated_at:new Date().toISOString()})});
+  return true;
+}
+
+async function addCardAfterDiary(authorKey){
+  const row=await getCards(authorKey);
+  const body={author:authorKey,cards:(row?row.cards:0)+1,updated_at:new Date().toISOString()};
+  if(!row)body.last_checkin_date=null;
+  await fetch(CARDS_API+'?on_conflict=author',{method:'POST',headers:{...H,'Prefer':'resolution=merge-duplicates'},body:JSON.stringify(body)});
+}
+
+/* ====== 签到弹窗 ====== */
+async function triggerCheckin(){
+  const data=await getAllCards();
+  const jiRow=data.find(r=>r.author==='ji')||{cards:0,last_checkin_date:null};
+  const siRow=data.find(r=>r.author==='sihan')||{cards:0,last_checkin_date:null};
+  const today=todayStr();
+  const jiDone=jiRow.last_checkin_date===today;
+  const siDone=siRow.last_checkin_date===today;
+  if(jiDone&&siDone){refreshCardsPage();return;}
+  document.getElementById('ci-ji-btn').disabled=jiDone;
+  document.getElementById('ci-ji-btn').textContent=jiDone?'今天已签 ✓':'✦ 霁 签到';
+  document.getElementById('ci-si-btn').disabled=siDone;
+  document.getElementById('ci-si-btn').textContent=siDone?'今天已签 ✓':'✿ 思涵 签到';
+  document.getElementById('checkin-modal').style.display='flex';
+}
+
+async function checkinAs(authorKey){
+  const ok=await doCheckin(authorKey);
+  if(ok){
+    const btn=document.getElementById(authorKey==='ji'?'ci-ji-btn':'ci-si-btn');
+    btn.disabled=true;btn.textContent='今天已签 ✓';
+    showToast('签到成功！+1张亲亲卡 💌');
+  }
+  const jiDone=document.getElementById('ci-ji-btn').disabled;
+  const siDone=document.getElementById('ci-si-btn').disabled;
+  if(jiDone&&siDone)setTimeout(()=>{document.getElementById('checkin-modal').style.display='none';refreshCardsPage();},800);
+}
+
+/* ====== 卡包页 ====== */
+async function refreshCardsPage(){
+  const data=await getAllCards();
+  const jiCards=(data.find(r=>r.author==='ji')||{cards:0}).cards;
+  const siCards=(data.find(r=>r.author==='sihan')||{cards:0}).cards;
+  document.getElementById('ji-cards').textContent=jiCards;
+  document.getElementById('si-cards').textContent=siCards;
+}
+
+async function redeemCard(authorKey){
+  const ok=await useCard(authorKey);
+  if(ok){showToast('兑换成功！mua~ 💋');await refreshCardsPage();}
+  else showToast('卡不够啦，快去写日记签到！');
+}
 </script>
 </body>
 </html>
