@@ -651,21 +651,41 @@ function renderAnni(list){
         <div style="font-size:12px;color:var(--text3);margin-bottom:6px">${a.date}</div>
         <div style="font-size:20px;font-weight:700;color:${countColor}">${countLabel}</div>
       </div>
-      <button onclick="deleteAnni(${a.id})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;flex-shrink:0">×</button>
+      <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+        <button onclick="openEditAnni(${a.id},'${a.title.replace(/'/g,"\\'")}','${a.date}','${a.icon||'💕'}')" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:12px;cursor:pointer;padding:4px 8px">编辑</button>
+        <button onclick="deleteAnni(${a.id})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px">×</button>
+      </div>
     </div>`;
   }).join('');
 }
 
+let editingAnniId=null;
+
 function openAnniForm(){
+  editingAnniId=null;
   anniIcon='💕';
   document.getElementById('icon-selected').textContent='已选：💕';
   document.getElementById('anni-title-input').value='';
   document.getElementById('anni-date-input').value='';
+  document.querySelector('#anni-overlay .sheet-title').textContent='添加纪念日';
+  document.getElementById('anni-save-btn').textContent='保存';
   document.getElementById('anni-overlay').classList.add('show');
   setTimeout(()=>document.getElementById('anni-title-input').focus(),300);
 }
 
-function closeAnniForm(){document.getElementById('anni-overlay').classList.remove('show');}
+function openEditAnni(id,title,date,icon){
+  editingAnniId=id;
+  anniIcon=icon||'💕';
+  document.getElementById('icon-selected').textContent='已选：'+anniIcon;
+  document.getElementById('anni-title-input').value=title;
+  document.getElementById('anni-date-input').value=date;
+  document.querySelector('#anni-overlay .sheet-title').textContent='编辑纪念日';
+  document.getElementById('anni-save-btn').textContent='保存修改';
+  document.getElementById('anni-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('anni-title-input').focus(),300);
+}
+
+function closeAnniForm(){document.getElementById('anni-overlay').classList.remove('show');editingAnniId=null;}
 
 function selectIcon(icon){
   anniIcon=icon;
@@ -679,11 +699,17 @@ async function saveAnni(){
   const btn=document.getElementById('anni-save-btn');
   btn.disabled=true;btn.textContent='保存中…';
   try{
-    const r=await fetch(ANNI_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,date,icon:anniIcon})});
-    if(r.ok){closeAnniForm();showToast('添加成功 ✓');await loadAnni();}
-    else showToast('保存失败，请重试');
+    if(editingAnniId){
+      const r=await fetch(ANNI_API+'?id=eq.'+editingAnniId,{method:'PATCH',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,date,icon:anniIcon})});
+      if(r.ok){closeAnniForm();showToast('修改成功 ✓');await loadAnni();}
+      else showToast('保存失败，请重试');
+    }else{
+      const r=await fetch(ANNI_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,date,icon:anniIcon})});
+      if(r.ok){closeAnniForm();showToast('添加成功 ✓');await loadAnni();}
+      else showToast('保存失败，请重试');
+    }
   }catch(e){showToast('网络错误');}
-  btn.disabled=false;btn.textContent='保存';
+  btn.disabled=false;btn.textContent=editingAnniId?'保存修改':'保存';
 }
 
 async function deleteAnni(id){
