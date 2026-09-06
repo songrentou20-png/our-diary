@@ -244,26 +244,51 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
 
 <!-- 一起听页面 -->
 <div id="page-music" class="page">
-  <div style="max-width:480px;margin:0 auto;padding:16px 16px 100px">
-    <!-- 播放器卡片 -->
-    <div id="music-player" style="display:none;background:var(--surface);border-radius:24px;border:1px solid var(--border);padding:24px 20px 20px;margin-bottom:16px;text-align:center">
-      <div id="album-art" style="width:180px;height:180px;margin:0 auto 20px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--ji),var(--si));display:flex;align-items:center;justify-content:center;font-size:56px;box-shadow:0 8px 32px rgba(55,138,221,0.25)">🎵</div>
-      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px" id="player-title">—</div>
-      <div style="font-size:14px;color:var(--text3);margin-bottom:20px" id="player-artist">—</div>
-      <div id="web-player-wrap" style="display:none;margin-bottom:12px">
-        <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" style="display:block;border-radius:10px;overflow:hidden" src=""></iframe>
+  <div style="position:relative;min-height:100vh;overflow:hidden">
+    <div style="position:fixed;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.45);top:8%;left:-50px;pointer-events:none;z-index:0"></div>
+    <div style="position:fixed;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.35);top:30%;right:-30px;pointer-events:none;z-index:0"></div>
+    <div style="position:fixed;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.3);bottom:35%;left:30px;pointer-events:none;z-index:0"></div>
+    <div style="position:relative;z-index:1;max-width:480px;margin:0 auto;padding:16px 16px 100px">
+      <!-- 歌单视图 -->
+      <div id="music-list-view">
+        <div style="text-align:center;font-size:18px;font-weight:600;margin-bottom:20px;color:var(--text)">一起听 🎵</div>
+        <div id="music-empty" style="text-align:center;padding:40px 0;color:var(--text3);font-size:14px">还没有歌曲，快加一首吧 🎶</div>
+        <div id="song-list" style="display:flex;flex-direction:column;gap:8px"></div>
+        <button onclick="openMusicForm()" style="width:100%;margin-top:14px;padding:14px;background:transparent;border:1.5px dashed var(--border);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加歌曲</button>
       </div>
-      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:8px">
-        <button onclick="prevSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏮</button>
-        <button onclick="toggleWebPlayer()" style="width:56px;height:56px;border-radius:50%;border:none;background:var(--ji);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 4px 16px rgba(55,138,221,0.4)">♪</button>
-        <button onclick="nextSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏭</button>
+      <!-- 播放器视图 -->
+      <div id="music-player" style="display:none">
+        <div style="display:flex;align-items:center;margin-bottom:16px">
+          <button onclick="closePlayer()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text2);padding:4px 8px 4px 0">‹</button>
+          <span style="font-size:16px;font-weight:600;color:var(--text)">一起听</span>
+          <span style="margin-left:auto;font-size:12px;color:var(--text3)">正在播放</span>
+        </div>
+        <div id="album-art" style="width:200px;height:200px;margin:0 auto 20px;border-radius:20px;overflow:hidden;background:linear-gradient(135deg,#378ADD,#D4537E);display:flex;align-items:center;justify-content:center;font-size:60px;box-shadow:0 12px 40px rgba(55,138,221,0.25)">🎵</div>
+        <div id="player-title" style="font-size:22px;font-weight:700;color:var(--text);text-align:center;margin-bottom:6px;padding:0 8px">—</div>
+        <div id="player-artist" style="font-size:14px;color:var(--text3);text-align:center;margin-bottom:20px">—</div>
+        <div style="height:76px;overflow:hidden;text-align:center;margin-bottom:20px">
+          <div id="lyric-prev" style="font-size:13px;color:var(--text3);margin-bottom:10px;min-height:18px;transition:all 0.4s"></div>
+          <div id="lyric-curr" style="font-size:15px;color:var(--ji);font-weight:600;margin-bottom:10px;min-height:20px;transition:all 0.4s"></div>
+          <div id="lyric-next" style="font-size:13px;color:var(--text3);min-height:18px;transition:all 0.4s"></div>
+        </div>
+        <div style="height:3px;background:var(--border);border-radius:2px;margin-bottom:24px;overflow:hidden">
+          <div id="progress-bar" style="height:100%;background:linear-gradient(90deg,var(--ji),var(--si));border-radius:2px;width:0%;transition:width 0.5s linear"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:16px">
+          <button onclick="prevSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏮</button>
+          <button onclick="toggleWebPlayer()" style="width:60px;height:60px;border-radius:50%;border:none;background:var(--ji);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 6px 20px rgba(55,138,221,0.4)">♪</button>
+          <button onclick="nextSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏭</button>
+        </div>
+        <div id="web-player-wrap" style="display:none;margin-bottom:8px">
+          <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" style="display:block;border-radius:12px;overflow:hidden" src=""></iframe>
+        </div>
+        <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">点 ♪ 显示网页播放器</div>
+        <div style="border-top:1px solid var(--border);padding-top:14px">
+          <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">播放列表</div>
+          <div id="mini-song-list" style="display:flex;flex-direction:column;gap:6px"></div>
+        </div>
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-top:4px">点 ♪ 显示网页播放器</div>
     </div>
-    <div id="music-empty" style="text-align:center;padding:40px 0;color:var(--text3);font-size:14px">还没有歌曲，快加一首吧 🎶</div>
-    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;display:none" id="playlist-label">播放列表</div>
-    <div id="song-list" style="display:flex;flex-direction:column;gap:8px"></div>
-    <button onclick="openMusicForm()" style="width:100%;margin-top:14px;padding:14px;background:transparent;border:1.5px dashed var(--border);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加歌曲</button>
   </div>
 </div>
 
@@ -677,19 +702,27 @@ async function refreshCardsPage(){
 
 /* ====== 一起听 ====== */
 const SONGS_API=SB+'/rest/v1/songs';
-let songs=[],currentSongId=null;
+const PROXY='https://hxqllfmodimoxnwpudsn.supabase.co/functions/v1/netease-proxy';
+let songs=[],currentSongId=null,lyrics=[],lyricTimer=null,songStartTime=null,songDuration=0,progressTimer=null;
+let musicAuthor='sihan';
 
-function parseSongId(link){
-  const m=link.match(/[?&]id=(\d+)/);
-  return m?m[1]:null;
+function parseLrc(lrc){
+  const res=[];
+  for(const line of (lrc||'').split('\n')){
+    const m=line.match(/\[(\d+):(\d+)[.:](\d+)\](.*)/);
+    if(m){const t=parseInt(m[1])*60+parseInt(m[2])+parseInt(m[3])/100;const txt=m[4].trim();if(txt)res.push({time:t,text:txt});}
+  }
+  return res.sort((a,b)=>a.time-b.time);
+}
+
+function setMusicAuthor(a){
+  musicAuthor=a;
+  document.getElementById('music-pick-ji').classList.toggle('active',a==='ji');
+  document.getElementById('music-pick-si').classList.toggle('active',a==='sihan');
 }
 
 async function loadSongs(){
-  try{
-    const r=await fetch(SONGS_API+'?select=*&order=created_at.asc',{headers:H});
-    songs=await r.json();
-    if(!Array.isArray(songs))songs=[];
-  }catch(e){songs=[];}
+  try{const r=await fetch(SONGS_API+'?select=*&order=created_at.asc',{headers:H});songs=await r.json();if(!Array.isArray(songs))songs=[];}catch(e){songs=[];}
   renderSongList();
 }
 
@@ -698,32 +731,85 @@ function renderSongList(){
   const emptyEl=document.getElementById('music-empty');
   if(!songs.length){listEl.innerHTML='';emptyEl.style.display='block';return;}
   emptyEl.style.display='none';
-  listEl.innerHTML=songs.map((s,i)=>{
+  listEl.innerHTML=songs.map(s=>{
     const isPlaying=currentSongId===s.id;
     const isJi=s.added_by==='ji';
-    return`<div onclick="playSong(${s.id})" style="background:var(--surface);border-radius:14px;border:1.5px solid ${isPlaying?'var(--ji)':'var(--border)'};padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color 0.2s">
-      <div style="width:36px;height:36px;border-radius:8px;background:${isPlaying?'linear-gradient(135deg,var(--ji),var(--si))':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:${isPlaying?'16':'14'}px">${isPlaying?'▶':'♪'}</div>
+    return`<div onclick="playSong(${s.id})" style="background:var(--surface);border-radius:14px;border:1.5px solid ${isPlaying?'#378ADD':'var(--border)'};padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer">
+      <div style="width:36px;height:36px;border-radius:8px;background:${isPlaying?'linear-gradient(135deg,#378ADD,#D4537E)':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px">${isPlaying?'▶':'♪'}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:${isPlaying?'700':'500'};color:${isPlaying?'var(--ji)':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.title)}</div>
+        <div style="font-size:14px;font-weight:${isPlaying?700:500};color:${isPlaying?'#378ADD':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.title)}</div>
         <div style="font-size:12px;color:var(--text3);margin-top:2px">${esc(s.artist)} · ${isJi?'霁':'思涵'}加的</div>
       </div>
       <button onclick="event.stopPropagation();deleteSong(${s.id})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0">×</button>
     </div>`;
   }).join('');
+  // mini list in player
+  const miniEl=document.getElementById('mini-song-list');
+  if(miniEl)miniEl.innerHTML=songs.map(s=>{
+    const isPlaying=currentSongId===s.id;
+    return`<div onclick="playSong(${s.id})" style="display:flex;align-items:center;gap:10px;padding:8px 4px;cursor:pointer;border-radius:8px;${isPlaying?'background:var(--ji-bg)':''}">
+      <span style="font-size:12px;color:${isPlaying?'var(--ji)':'var(--text3)'}">${isPlaying?'▶':'♪'}</span>
+      <span style="font-size:13px;color:${isPlaying?'var(--ji)':'var(--text)'};font-weight:${isPlaying?600:400};flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.title)}</span>
+      <span style="font-size:11px;color:var(--text3)">${esc(s.artist)}</span>
+    </div>`;
+  }).join('');
 }
 
-function playSong(id){
+async function playSong(id){
   const s=songs.find(x=>x.id===id);if(!s)return;
   currentSongId=id;
+  // 切换到播放器视图
+  document.getElementById('music-list-view').style.display='none';
+  document.getElementById('music-player').style.display='block';
   document.getElementById('player-title').textContent=s.title;
   document.getElementById('player-artist').textContent=s.artist;
-  const art=document.getElementById('album-art');
-  if(s.cover_url){art.innerHTML=`<img src="${s.cover_url}" style="width:100%;height:100%;object-fit:cover">`;}
-  else{art.innerHTML='🎵';}
   document.getElementById('web-player-wrap').style.display='none';
   document.getElementById('music-iframe').src=`https://music.163.com/outchain/player?type=2&id=${s.song_id}&auto=1&height=66`;
-  document.getElementById('music-player').style.display='block';
-  document.getElementById('playlist-label').style.display='block';
+  // 重置歌词和进度
+  lyrics=[];songStartTime=Date.now();songDuration=0;
+  if(lyricTimer)clearInterval(lyricTimer);
+  if(progressTimer)clearInterval(progressTimer);
+  document.getElementById('lyric-prev').textContent='';
+  document.getElementById('lyric-curr').textContent='加载歌词中…';
+  document.getElementById('lyric-next').textContent='';
+  document.getElementById('progress-bar').style.width='0%';
+  renderSongList();
+  // 拉取封面和歌词
+  try{
+    const [dr,lr]=await Promise.all([
+      fetch(`${PROXY}?type=detail&id=${s.song_id}`).then(r=>r.json()),
+      fetch(`${PROXY}?type=lyric&id=${s.song_id}`).then(r=>r.json())
+    ]);
+    if(dr.cover){document.getElementById('album-art').innerHTML=`<img src="${dr.cover}" style="width:100%;height:100%;object-fit:cover">`;}
+    else{document.getElementById('album-art').innerHTML='🎵';}
+    lyrics=parseLrc(lr.lyric||'');
+    if(lyrics.length){
+      songDuration=lyrics[lyrics.length-1].time+30;
+      lyricTimer=setInterval(updateLyrics,500);
+      progressTimer=setInterval(()=>{
+        const pct=Math.min(100,(Date.now()-songStartTime)/1000/songDuration*100);
+        document.getElementById('progress-bar').style.width=pct+'%';
+      },1000);
+    }else{document.getElementById('lyric-curr').textContent='暂无歌词';}
+  }catch(e){document.getElementById('lyric-curr').textContent='歌词加载失败';}
+}
+
+function updateLyrics(){
+  if(!lyrics.length)return;
+  const elapsed=(Date.now()-songStartTime)/1000;
+  let idx=lyrics.length-1;
+  for(let i=0;i<lyrics.length;i++){if(lyrics[i].time>elapsed){idx=i-1;break;}}
+  if(idx<0)idx=0;
+  document.getElementById('lyric-prev').textContent=idx>0?lyrics[idx-1].text:'';
+  document.getElementById('lyric-curr').textContent=lyrics[idx].text;
+  document.getElementById('lyric-next').textContent=idx<lyrics.length-1?lyrics[idx+1].text:'';
+}
+
+function closePlayer(){
+  if(lyricTimer)clearInterval(lyricTimer);
+  if(progressTimer)clearInterval(progressTimer);
+  document.getElementById('music-player').style.display='none';
+  document.getElementById('music-list-view').style.display='block';
   renderSongList();
 }
 
@@ -735,21 +821,13 @@ function toggleWebPlayer(){
 function prevSong(){
   const idx=songs.findIndex(x=>x.id===currentSongId);
   if(idx>0)playSong(songs[idx-1].id);
-  else if(songs.length)playSong(songs[songs.length-1].id);
+  else playSong(songs[songs.length-1].id);
 }
 
 function nextSong(){
   const idx=songs.findIndex(x=>x.id===currentSongId);
   if(idx<songs.length-1)playSong(songs[idx+1].id);
-  else if(songs.length)playSong(songs[0].id);
-}
-
-let musicAuthor='sihan';
-
-function setMusicAuthor(a){
-  musicAuthor=a;
-  document.getElementById('music-pick-ji').classList.toggle('active',a==='ji');
-  document.getElementById('music-pick-si').classList.toggle('active',a==='sihan');
+  else playSong(songs[0].id);
 }
 
 function openMusicForm(){
@@ -786,7 +864,7 @@ async function deleteSong(id){
   if(!confirm('确定删除这首歌吗？'))return;
   try{
     await fetch(SONGS_API+'?id=eq.'+id,{method:'DELETE',headers:H});
-    if(currentSongId===id){currentSongId=null;document.getElementById('music-player').style.display='none';}
+    if(currentSongId===id)closePlayer();
     showToast('已删除');await loadSongs();
   }catch(e){showToast('删除失败');}
 }
