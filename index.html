@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="我们的小窝">
 <link rel="apple-touch-icon" href="https://hxqllfmodimoxnwpudsn.supabase.co/storage/v1/object/public/stickers/stickers/IMG_2812.jpeg">
 <title>我们的小窝</title>
 <style>
+html{background:#F5F7FA}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--bg:#F5F7FA;--surface:#FFFFFF;--border:#E8EBF0;--text:#1A1D23;--text2:#6B7280;--text3:#9CA3AF;--ji:#378ADD;--ji-bg:#EAF3FB;--ji-text:#185FA5;--si:#D4537E;--si-bg:#FBF0F4;--si-text:#993556;--accent:#378ADD;--r:14px}
 body{font-family:-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:var(--bg);min-height:100vh;color:var(--text);padding-bottom:64px;padding-top:env(safe-area-inset-top)}
@@ -124,15 +125,20 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   </div>
 </div>
 
-<div id="lock-screen" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px">
-  <div style="font-size:32px;margin-bottom:8px">🏠</div>
-  <div style="font-size:22px;font-weight:600;color:var(--text);margin-bottom:6px">我们的小窝</div>
-  <div style="font-size:13px;color:var(--text3);margin-bottom:48px">霁 与 思涵</div>
+<div id="lock-screen" style="position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;padding-top:calc(40px + env(safe-area-inset-top))">
+  <div style="font-size:36px;margin-bottom:16px">🏠</div>
+  <div style="font-size:24px;font-weight:700;color:var(--text);margin-bottom:6px">我们的小窝</div>
+  <div style="font-size:14px;color:var(--text3);margin-bottom:12px">霁 与 思涵</div>
+  <div style="background:linear-gradient(135deg,var(--ji-bg),var(--si-bg));border-radius:16px;padding:16px 28px;margin-bottom:36px;text-align:center;border:1px solid var(--border)">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:4px">在一起</div>
+    <div style="font-size:36px;font-weight:700;color:var(--ji)" id="days-counter">…</div>
+    <div style="font-size:13px;color:var(--text2);margin-top:4px">天 💕</div>
+  </div>
   <div style="display:flex;gap:12px;margin-bottom:12px" id="pin-dots">
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
   </div>
-  <div style="font-size:13px;color:var(--text-danger,#E24B4A);height:20px;margin-bottom:24px" id="pin-err"></div>
+  <div style="font-size:13px;color:var(--text-danger,#E24B4A);height:20px;margin-bottom:20px" id="pin-err"></div>
   <div style="display:grid;grid-template-columns:repeat(3,72px);gap:12px">
     <button class="pin-btn" onclick="pinInput('1')">1</button>
     <button class="pin-btn" onclick="pinInput('2')">2</button>
@@ -598,6 +604,14 @@ async function saveEntry(){
   saving=false;document.getElementById('savebtn').disabled=false;document.getElementById('savebtn').textContent='保存';
 }
 const PIN='260729';let pinVal='';
+// 计算在一起天数（2026-07-29）
+(function(){
+  const start=new Date('2026-07-29');start.setHours(0,0,0,0);
+  const today=new Date();today.setHours(0,0,0,0);
+  const days=Math.floor((today-start)/(1000*60*60*24));
+  const el=document.getElementById('days-counter');
+  if(el)el.textContent=days;
+})();
 function pinInput(d){
   if(pinVal.length>=6)return;
   pinVal+=d;updateDots();
