@@ -242,6 +242,51 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   </div>
 </div>
 
+<!-- 一起听页面 -->
+<div id="page-music" class="page">
+  <div style="max-width:480px;margin:0 auto;padding:16px 16px 100px">
+    <div style="text-align:center;font-size:18px;font-weight:600;margin-bottom:20px;color:var(--text)">一起听 🎵</div>
+    <div id="music-player" style="display:none;background:var(--surface);border-radius:20px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px">
+      <div style="padding:16px 16px 0;display:flex;align-items:center;gap:12px">
+        <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--ji),var(--si));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🎵</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="player-title">—</div>
+          <div style="font-size:12px;color:var(--text3);margin-top:2px" id="player-artist">—</div>
+        </div>
+      </div>
+      <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" style="display:block;margin-top:8px" src=""></iframe>
+    </div>
+    <div id="music-empty" style="text-align:center;padding:32px 0;color:var(--text3);font-size:14px">还没有歌曲，快加一首吧 🎶</div>
+    <div id="song-list" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button onclick="openMusicForm()" style="width:100%;margin-top:16px;padding:14px;background:transparent;border:1.5px dashed var(--border);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加歌曲</button>
+  </div>
+</div>
+
+<!-- 添加歌曲弹窗 -->
+<div class="overlay" id="music-overlay" onclick="if(event.target===this)closeMusicForm()">
+  <div class="form-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">添加歌曲</div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">歌名</div>
+      <input id="song-title-input" type="text" placeholder="比如：You And Me" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">歌手</div>
+      <input id="song-artist-input" type="text" placeholder="比如：Jamvana" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500">网易云分享链接</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px">在网易云找到歌曲 → 分享 → 复制链接，粘贴到这里</div>
+      <input id="song-link-input" type="url" placeholder="https://music.163.com/..." style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeMusicForm()">取消</button>
+      <button class="btn-save" id="music-save-btn" onclick="saveSong()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- 签到弹窗 -->
 <div id="checkin-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
   <div style="background:var(--bg);border-radius:24px;padding:28px 24px;width:80%;max-width:320px;text-align:center">
@@ -268,6 +313,9 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   </button>
   <button class="tab-btn" id="tab-anni" onclick="switchTab('anni')">
     <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>纪念日
+  </button>
+  <button class="tab-btn" id="tab-music" onclick="switchTab('music')">
+    <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>一起听
   </button>
 </div>
 
@@ -334,6 +382,7 @@ function switchTab(tab){
   if(tab==='cal')renderCal();
   if(tab==='cards')refreshCardsPage();
   if(tab==='anni')loadAnni();
+  if(tab==='music')loadSongs();
 }
 
 function buildMoodGrid(){
@@ -413,39 +462,46 @@ function renderMoodStats(){
   const el=document.getElementById('mood-stats');
   if(!el)return;
   const monthEntries=entries.filter(e=>{const d=new Date(e.created_at);return d.getFullYear()===calYear&&d.getMonth()===calMonth&&e.mood;});
-  if(!monthEntries.length){el.innerHTML='<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:13px">这个月还没有心情记录</div>';return;}
+  if(!monthEntries.length){el.innerHTML='<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:13px">这个月还没有心情记录 ✨</div>';return;}
   const jiEntries=monthEntries.filter(e=>e.author==='ji');
   const siEntries=monthEntries.filter(e=>e.author==='sihan');
-  function countMoods(arr){const c={};arr.forEach(e=>{c[e.mood]=(c[e.mood]||0)+1;});return c;}
-  const jiCount=countMoods(jiEntries);
-  const siCount=countMoods(siEntries);
-  const allMoodIds=[...new Set(monthEntries.map(e=>e.mood))];
-  const sorted=allMoodIds.sort((a,b)=>((jiCount[b]||0)+(siCount[b]||0))-((jiCount[a]||0)+(siCount[a]||0)));
-  const maxVal=Math.max(...sorted.map(id=>(jiCount[id]||0)+(siCount[id]||0)),1);
-  function moodRow(id){
-    const m=MOODS.find(x=>x.id===id);if(!m)return'';
-    const jiV=jiCount[id]||0;const siV=siCount[id]||0;const total=jiV+siV;
-    const pct=Math.round(total/maxVal*100);
-    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-      <svg viewBox="0 0 60 60" width="28" height="28" style="flex-shrink:0">${m.svg}</svg>
-      <div style="flex:1">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-size:12px;color:var(--text2)">${m.label}</span>
-          <span style="font-size:12px;color:var(--text3)">${jiV?`霁×${jiV} `:''}${siV?`思涵×${siV}`:''}</span>
-        </div>
-        <div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden">
-          <div style="height:100%;border-radius:4px;width:${pct}%;background:linear-gradient(90deg,var(--ji) ${jiV?Math.round(jiV/total*100):0}%,var(--si) ${jiV?Math.round(jiV/total*100):0}%);transition:width 0.4s ease"></div>
-        </div>
-      </div>
+  function buildBottle(list,label,color,hex,clipId){
+    const mc={};list.forEach(e=>{mc[e.mood]=(mc[e.mood]||0)+1;});
+    const moods=Object.entries(mc).sort((a,b)=>b[1]-a[1]);
+    const cols=3,fs=30,gap=6;
+    const bx=13,bw=92,bodyTop=52,bodyBot=182;
+    const rows=Math.ceil(moods.length/cols)||1;
+    const blockH=rows*(fs+gap);
+    const startY=Math.max(bodyTop+6,bodyBot-blockH-4);
+    const colW=Math.floor(bw/cols);
+    let faces='';
+    moods.forEach(([id,cnt],i)=>{
+      const m=MOODS.find(x=>x.id===id);if(!m)return;
+      const col=i%cols,row=Math.floor(i/cols);
+      const fx=bx+(col*colW)+(colW-fs)/2;
+      const fy=startY+row*(fs+gap);
+      faces+=`<svg x="${fx}" y="${fy}" width="${fs}" height="${fs}" viewBox="0 0 60 60" style="overflow:visible">${m.svg}</svg>`;
+      if(cnt>1)faces+=`<circle cx="${fx+fs-2}" cy="${fy+4}" r="7" fill="${hex}"/><text x="${fx+fs-2}" y="${fy+8}" font-size="8" fill="white" font-weight="700" text-anchor="middle" font-family="-apple-system,sans-serif">${cnt}</text>`;
+    });
+    const bp=`M42,4 L76,4 Q82,4 86,20 Q106,42 106,72 L106,172 Q106,190 88,190 L30,190 Q12,190 12,172 L12,72 Q12,42 32,20 Q36,4 42,4 Z`;
+    return`<div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+      <svg width="118" height="200" viewBox="0 0 118 200" style="overflow:visible">
+        <defs><clipPath id="${clipId}"><path d="${bp}"/></clipPath></defs>
+        <path d="${bp}" fill="rgba(248,249,252,0.9)" stroke="none"/>
+        <g clip-path="url(#${clipId})">${faces}</g>
+        <path d="${bp}" fill="none" stroke="${hex}" stroke-width="2.5" stroke-linejoin="round"/>
+        <rect x="34" y="0" width="50" height="7" rx="3" fill="${hex}" opacity="0.25"/>
+      </svg>
+      <div style="font-size:13px;font-weight:600;color:${color}">${label}</div>
+      <div style="font-size:11px;color:var(--text3)">${list.length}篇日记</div>
     </div>`;
   }
   el.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:16px;border:1px solid var(--border)">
-    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px">本月心情统计 <span style="font-size:12px;font-weight:400;color:var(--text3)">共${monthEntries.length}篇</span></div>
-    <div style="display:flex;gap:16px;margin-bottom:16px">
-      <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--ji)"></div><span style="font-size:12px;color:var(--text2)">霁 ${jiEntries.length}篇</span></div>
-      <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--si)"></div><span style="font-size:12px;color:var(--text2)">思涵 ${siEntries.length}篇</span></div>
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px;text-align:center">本月心情 <span style="font-size:12px;font-weight:400;color:var(--text3)">共${monthEntries.length}篇</span></div>
+    <div style="display:flex;justify-content:space-around;align-items:flex-end">
+      ${buildBottle(jiEntries,'霁','var(--ji)','#378ADD','bc-ji')}
+      ${buildBottle(siEntries,'思涵','var(--si)','#D4537E','bc-si')}
     </div>
-    ${sorted.map(moodRow).join('')}
   </div>`;
 }
 
@@ -608,6 +664,89 @@ async function refreshCardsPage(){
   const siCards=(data.find(r=>r.author==='sihan')||{cards:0}).cards;
   document.getElementById('ji-cards').textContent=jiCards;
   document.getElementById('si-cards').textContent=siCards;
+}
+
+/* ====== 一起听 ====== */
+const SONGS_API=SB+'/rest/v1/songs';
+let songs=[],currentSongId=null;
+
+function parseSongId(link){
+  const m=link.match(/[?&]id=(\d+)/);
+  return m?m[1]:null;
+}
+
+async function loadSongs(){
+  try{
+    const r=await fetch(SONGS_API+'?select=*&order=created_at.asc',{headers:H});
+    songs=await r.json();
+    if(!Array.isArray(songs))songs=[];
+  }catch(e){songs=[];}
+  renderSongList();
+}
+
+function renderSongList(){
+  const listEl=document.getElementById('song-list');
+  const emptyEl=document.getElementById('music-empty');
+  if(!songs.length){listEl.innerHTML='';emptyEl.style.display='block';return;}
+  emptyEl.style.display='none';
+  listEl.innerHTML=songs.map((s,i)=>{
+    const isPlaying=currentSongId===s.id;
+    const isJi=s.added_by==='ji';
+    return`<div onclick="playSong(${s.id})" style="background:var(--surface);border-radius:14px;border:1.5px solid ${isPlaying?'var(--ji)':'var(--border)'};padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color 0.2s">
+      <div style="width:36px;height:36px;border-radius:8px;background:${isPlaying?'linear-gradient(135deg,var(--ji),var(--si))':'var(--border)'};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:${isPlaying?'16':'14'}px">${isPlaying?'▶':'♪'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:14px;font-weight:${isPlaying?'700':'500'};color:${isPlaying?'var(--ji)':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(s.title)}</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px">${esc(s.artist)} · ${isJi?'霁':'思涵'}加的</div>
+      </div>
+      <button onclick="event.stopPropagation();deleteSong(${s.id})" style="background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;padding:4px;flex-shrink:0">×</button>
+    </div>`;
+  }).join('');
+}
+
+function playSong(id){
+  const s=songs.find(x=>x.id===id);if(!s)return;
+  currentSongId=id;
+  document.getElementById('player-title').textContent=s.title;
+  document.getElementById('player-artist').textContent=s.artist;
+  document.getElementById('music-iframe').src=`https://music.163.com/outchain/player?type=2&id=${s.song_id}&auto=1&height=66`;
+  document.getElementById('music-player').style.display='block';
+  renderSongList();
+}
+
+function openMusicForm(){
+  document.getElementById('song-title-input').value='';
+  document.getElementById('song-artist-input').value='';
+  document.getElementById('song-link-input').value='';
+  document.getElementById('music-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('song-title-input').focus(),300);
+}
+
+function closeMusicForm(){document.getElementById('music-overlay').classList.remove('show');}
+
+async function saveSong(){
+  const title=document.getElementById('song-title-input').value.trim();
+  const artist=document.getElementById('song-artist-input').value.trim();
+  const link=document.getElementById('song-link-input').value.trim();
+  if(!title||!artist||!link){showToast('歌名、歌手和链接都要填');return;}
+  const songId=parseSongId(link);
+  if(!songId){showToast('链接格式不对，请重新复制网易云分享链接');return;}
+  const btn=document.getElementById('music-save-btn');
+  btn.disabled=true;btn.textContent='保存中…';
+  try{
+    const r=await fetch(SONGS_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,artist,song_id:songId,added_by:author})});
+    if(r.ok){closeMusicForm();showToast('添加成功 🎵');await loadSongs();}
+    else showToast('保存失败，请重试');
+  }catch(e){showToast('网络错误');}
+  btn.disabled=false;btn.textContent='保存';
+}
+
+async function deleteSong(id){
+  if(!confirm('确定删除这首歌吗？'))return;
+  try{
+    await fetch(SONGS_API+'?id=eq.'+id,{method:'DELETE',headers:H});
+    if(currentSongId===id){currentSongId=null;document.getElementById('music-player').style.display='none';}
+    showToast('已删除');await loadSongs();
+  }catch(e){showToast('删除失败');}
 }
 
 async function redeemCard(authorKey){
