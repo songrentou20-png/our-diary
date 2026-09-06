@@ -23,9 +23,9 @@ body::before{content:'';position:fixed;inset:0;background:rgba(240,245,252,0.12)
 .write-btn svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .main{max-width:480px;margin:0 auto;padding:16px 16px 20px}
 .tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.7);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
-.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;cursor:pointer;border:none;background:none;gap:3px;color:var(--text3);font-size:11px;font-family:inherit}
+.tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0;cursor:pointer;border:none;background:none;gap:2px;color:var(--text3);font-size:10px;font-family:inherit}
 .tab-btn.active{color:var(--accent)}
-.tab-btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .page{display:none}
 .page.active{display:block}
 .loading-wrap{text-align:center;padding:60px 0;color:var(--text3);font-size:14px}
@@ -370,6 +370,68 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   </div>
 </div>
 
+<!-- 记账页面 -->
+<div id="page-ledger" class="page">
+  <div style="max-width:480px;margin:0 auto;padding:16px 16px 100px">
+    <!-- 月份导航 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <button onclick="changeLedgerMonth(-1)" style="background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.6);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--text2)">‹</button>
+      <div style="font-size:15px;font-weight:600;color:var(--text)" id="ledger-month-label"></div>
+      <button onclick="changeLedgerMonth(1)" style="background:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.6);border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;color:var(--text2)">›</button>
+    </div>
+    <!-- 收支概览 -->
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div style="flex:1;background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.6);text-align:center">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">收入</div>
+        <div style="font-size:16px;font-weight:600;color:#4CAF88" id="ledger-income">€0</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.6);text-align:center">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">支出</div>
+        <div style="font-size:16px;font-weight:600;color:var(--si)" id="ledger-expense">€0</div>
+      </div>
+      <div style="flex:1;background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);border-radius:14px;padding:12px;border:1px solid rgba(255,255,255,0.6);text-align:center">
+        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">结余</div>
+        <div style="font-size:16px;font-weight:600;color:var(--ji)" id="ledger-balance">€0</div>
+      </div>
+    </div>
+    <!-- 账单列表 -->
+    <div id="ledger-list"></div>
+    <button onclick="openLedgerForm()" style="width:100%;margin-top:14px;padding:14px;background:transparent;border:1.5px dashed rgba(200,215,230,0.6);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加账单</button>
+  </div>
+</div>
+
+<!-- 添加账单弹窗 -->
+<div class="overlay" id="ledger-overlay" onclick="if(event.target===this)closeLedgerForm()">
+  <div class="form-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">添加账单</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+      <button id="ledger-type-income" onclick="setLedgerType('income')" style="padding:10px;border-radius:10px;border:1.5px solid #4CAF88;background:rgba(76,175,136,0.12);color:#2E7D5A;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">收入</button>
+      <button id="ledger-type-expense" onclick="setLedgerType('expense')" style="padding:10px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg);color:var(--text2);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit">支出</button>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">金额 (€)</div>
+      <input id="ledger-amount-input" type="number" inputmode="decimal" placeholder="0.00" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:18px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">类别</div>
+      <div id="ledger-cat-picker" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">日期</div>
+      <input id="ledger-date-input" type="date" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">备注（可选）</div>
+      <input id="ledger-note-input" type="text" placeholder="买了什么…" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeLedgerForm()">取消</button>
+      <button class="btn-save" id="ledger-save-btn" onclick="saveLedgerEntry()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- 签到弹窗 -->
 <div id="checkin-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
   <div style="background:var(--bg);border-radius:24px;padding:28px 24px;width:80%;max-width:320px;text-align:center">
@@ -385,9 +447,6 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
 </div>
 
 <div class="tab-bar" id="main-tabbar" style="display:none">
-  <button class="tab-btn active" id="tab-home" onclick="switchTab('home')">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>小窝
-  </button>
   <button class="tab-btn" id="tab-diary" onclick="switchTab('diary')">
     <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>日记
   </button>
@@ -397,11 +456,17 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   <button class="tab-btn" id="tab-cards" onclick="switchTab('cards')">
     <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>卡包
   </button>
+  <button class="tab-btn active" id="tab-home" onclick="switchTab('home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>小窝
+  </button>
   <button class="tab-btn" id="tab-anni" onclick="switchTab('anni')">
     <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>纪念日
   </button>
   <button class="tab-btn" id="tab-music" onclick="switchTab('music')">
     <svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>一起听
+  </button>
+  <button class="tab-btn" id="tab-ledger" onclick="switchTab('ledger')">
+    <svg viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>记账
   </button>
 </div>
 
@@ -470,6 +535,7 @@ function switchTab(tab){
   if(tab==='cards')refreshCardsPage();
   if(tab==='anni')loadAnni();
   if(tab==='music')loadSongs();
+  if(tab==='ledger')loadLedger();
 }
 
 function buildMoodGrid(){
@@ -1145,6 +1211,114 @@ async function saveAnni(){
 async function deleteAnni(id){
   if(!confirm('确定删除这个纪念日吗？'))return;
   try{await fetch(ANNI_API+'?id=eq.'+id,{method:'DELETE',headers:H});showToast('已删除');await loadAnni();}
+  catch(e){showToast('删除失败');}
+}
+
+/* ====== 记账 ====== */
+const LEDGER_API=SB+'/rest/v1/ledger';
+const INCOME_CATS=['工资','红包','兼职','其他收入'];
+const EXPENSE_CATS=['餐饮','购物','交通','娱乐','美容护理','日用品','医疗','霁','其他'];
+let ledgerType='expense',ledgerCat='',ledgerYear=new Date().getFullYear(),ledgerMonth=new Date().getMonth();
+
+function buildCatPicker(){
+  const cats=ledgerType==='income'?INCOME_CATS:EXPENSE_CATS;
+  document.getElementById('ledger-cat-picker').innerHTML=cats.map(c=>`<button onclick="pickLedgerCat('${c}')" id="lcat-${c}" style="padding:6px 12px;border-radius:20px;border:1px solid ${ledgerCat===c?'var(--ji)':'var(--border)'};background:${ledgerCat===c?'var(--ji-bg)':'transparent'};font-size:12px;color:${ledgerCat===c?'var(--ji-text)':'var(--text2)'};cursor:pointer;font-family:inherit">${c}</button>`).join('');
+}
+
+function pickLedgerCat(c){ledgerCat=c;buildCatPicker();}
+
+function setLedgerType(t){
+  ledgerType=t;ledgerCat='';
+  document.getElementById('ledger-type-income').style.borderColor=t==='income'?'#4CAF88':'var(--border)';
+  document.getElementById('ledger-type-income').style.background=t==='income'?'rgba(76,175,136,0.12)':'var(--bg)';
+  document.getElementById('ledger-type-income').style.color=t==='income'?'#2E7D5A':'var(--text2)';
+  document.getElementById('ledger-type-expense').style.borderColor=t==='expense'?'var(--si)':'var(--border)';
+  document.getElementById('ledger-type-expense').style.background=t==='expense'?'var(--si-bg)':'var(--bg)';
+  document.getElementById('ledger-type-expense').style.color=t==='expense'?'var(--si-text)':'var(--text2)';
+  buildCatPicker();
+}
+
+function openLedgerForm(){
+  ledgerType='expense';ledgerCat='';
+  setLedgerType('expense');
+  document.getElementById('ledger-amount-input').value='';
+  document.getElementById('ledger-note-input').value='';
+  document.getElementById('ledger-date-input').value=new Date().toISOString().slice(0,10);
+  document.getElementById('ledger-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('ledger-amount-input').focus(),300);
+}
+
+function closeLedgerForm(){document.getElementById('ledger-overlay').classList.remove('show');}
+
+async function saveLedgerEntry(){
+  const amount=parseFloat(document.getElementById('ledger-amount-input').value);
+  const date=document.getElementById('ledger-date-input').value;
+  const note=document.getElementById('ledger-note-input').value.trim();
+  if(!amount||amount<=0){showToast('金额要大于0');return;}
+  if(!ledgerCat){showToast('请选择类别');return;}
+  if(!date){showToast('请选择日期');return;}
+  const btn=document.getElementById('ledger-save-btn');
+  btn.disabled=true;btn.textContent='保存中…';
+  try{
+    const r=await fetch(LEDGER_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({type:ledgerType,amount,category:ledgerCat,note,date})});
+    if(r.ok){closeLedgerForm();showToast('已记录');await loadLedger();}
+    else showToast('保存失败');
+  }catch(e){showToast('网络错误');}
+  btn.disabled=false;btn.textContent='保存';
+}
+
+function changeLedgerMonth(dir){
+  ledgerMonth+=dir;
+  if(ledgerMonth<0){ledgerMonth=11;ledgerYear--;}
+  if(ledgerMonth>11){ledgerMonth=0;ledgerYear++;}
+  loadLedger();
+}
+
+async function loadLedger(){
+  const label=document.getElementById('ledger-month-label');
+  if(label)label.textContent=`${ledgerYear}年${ledgerMonth+1}月`;
+  const start=`${ledgerYear}-${String(ledgerMonth+1).padStart(2,'0')}-01`;
+  const endDate=new Date(ledgerYear,ledgerMonth+1,1);
+  const end=`${endDate.getFullYear()}-${String(endDate.getMonth()+1).padStart(2,'0')}-01`;
+  try{
+    const r=await fetch(`${LEDGER_API}?select=*&date=gte.${start}&date=lt.${end}&order=date.desc,created_at.desc`,{headers:H});
+    const data=await r.json();
+    if(!Array.isArray(data))return;
+    let income=0,expense=0;
+    data.forEach(e=>{if(e.type==='income')income+=parseFloat(e.amount);else expense+=parseFloat(e.amount);});
+    document.getElementById('ledger-income').textContent=`€${income.toFixed(2)}`;
+    document.getElementById('ledger-expense').textContent=`€${expense.toFixed(2)}`;
+    const bal=income-expense;
+    const balEl=document.getElementById('ledger-balance');
+    balEl.textContent=(bal>=0?'+':'')+`€${bal.toFixed(2)}`;
+    balEl.style.color=bal>=0?'var(--ji)':'var(--si)';
+    const listEl=document.getElementById('ledger-list');
+    if(!data.length){listEl.innerHTML='<div style="text-align:center;padding:32px 0;color:var(--text3);font-size:14px">这个月还没有记录</div>';return;}
+    // 按日期分组
+    const byDay={};
+    data.forEach(e=>{if(!byDay[e.date])byDay[e.date]=[];byDay[e.date].push(e);});
+    listEl.innerHTML=Object.keys(byDay).sort((a,b)=>b.localeCompare(a)).map(day=>{
+      const items=byDay[day];
+      return`<div style="margin-bottom:12px">
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px">${day.slice(5).replace('-','月')}日</div>
+        ${items.map(e=>`<div style="background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.55)">
+          <div style="width:34px;height:34px;border-radius:50%;background:${e.type==='income'?'rgba(76,175,136,0.15)':'rgba(184,134,154,0.15)'};display:flex;align-items:center;justify-content:center;font-size:12px;color:${e.type==='income'?'#2E7D5A':'var(--si-text)'};font-weight:600;flex-shrink:0">${e.category.slice(0,2)}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:500;color:var(--text)">${esc(e.category)}${e.note?` · ${esc(e.note)}`:''}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:15px;font-weight:600;color:${e.type==='income'?'#4CAF88':'var(--si)'}">${e.type==='income'?'+':'-'}€${parseFloat(e.amount).toFixed(2)}</div>
+            <button onclick="deleteLedgerEntry(${e.id})" style="background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;padding:2px">×</button>
+          </div>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+  }catch(e){showToast('加载失败');}
+}
+
+async function deleteLedgerEntry(id){
+  if(!confirm('确定删除这条记录吗？'))return;
+  try{await fetch(`${LEDGER_API}?id=eq.${id}`,{method:'DELETE',headers:H});showToast('已删除');await loadLedger();}
   catch(e){showToast('删除失败');}
 }
 </script>
