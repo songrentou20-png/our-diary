@@ -245,20 +245,25 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
 <!-- 一起听页面 -->
 <div id="page-music" class="page">
   <div style="max-width:480px;margin:0 auto;padding:16px 16px 100px">
-    <div style="text-align:center;font-size:18px;font-weight:600;margin-bottom:20px;color:var(--text)">一起听 🎵</div>
-    <div id="music-player" style="display:none;background:var(--surface);border-radius:20px;border:1px solid var(--border);overflow:hidden;margin-bottom:16px">
-      <div style="padding:16px 16px 0;display:flex;align-items:center;gap:12px">
-        <div style="width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--ji),var(--si));display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">🎵</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="player-title">—</div>
-          <div style="font-size:12px;color:var(--text3);margin-top:2px" id="player-artist">—</div>
-        </div>
+    <!-- 播放器卡片 -->
+    <div id="music-player" style="display:none;background:var(--surface);border-radius:24px;border:1px solid var(--border);padding:24px 20px 20px;margin-bottom:16px;text-align:center">
+      <div id="album-art" style="width:180px;height:180px;margin:0 auto 20px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,var(--ji),var(--si));display:flex;align-items:center;justify-content:center;font-size:56px;box-shadow:0 8px 32px rgba(55,138,221,0.25)">🎵</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 8px" id="player-title">—</div>
+      <div style="font-size:14px;color:var(--text3);margin-bottom:20px" id="player-artist">—</div>
+      <div id="web-player-wrap" style="display:none;margin-bottom:12px">
+        <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" style="display:block;border-radius:10px;overflow:hidden" src=""></iframe>
       </div>
-      <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" style="display:block;margin-top:8px" src=""></iframe>
+      <div style="display:flex;gap:10px;justify-content:center;margin-bottom:8px">
+        <button onclick="prevSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏮</button>
+        <button onclick="toggleWebPlayer()" style="width:56px;height:56px;border-radius:50%;border:none;background:var(--ji);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 4px 16px rgba(55,138,221,0.4)">♪</button>
+        <button onclick="nextSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏭</button>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px">点 ♪ 显示网页播放器</div>
     </div>
-    <div id="music-empty" style="text-align:center;padding:32px 0;color:var(--text3);font-size:14px">还没有歌曲，快加一首吧 🎶</div>
-    <div id="song-list" style="display:flex;flex-direction:column;gap:10px"></div>
-    <button onclick="openMusicForm()" style="width:100%;margin-top:16px;padding:14px;background:transparent;border:1.5px dashed var(--border);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加歌曲</button>
+    <div id="music-empty" style="text-align:center;padding:40px 0;color:var(--text3);font-size:14px">还没有歌曲，快加一首吧 🎶</div>
+    <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px" id="playlist-label" style="display:none">播放列表</div>
+    <div id="song-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button onclick="openMusicForm()" style="width:100%;margin-top:14px;padding:14px;background:transparent;border:1.5px dashed var(--border);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加歌曲</button>
   </div>
 </div>
 
@@ -267,6 +272,10 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   <div class="form-sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">添加歌曲</div>
+    <div class="author-pick" style="margin-bottom:16px">
+      <button id="music-pick-ji" onclick="setMusicAuthor('ji')" class="pick-btn ji active">✦ 霁</button>
+      <button id="music-pick-si" onclick="setMusicAuthor('sihan')" class="pick-btn si">✿ 思涵</button>
+    </div>
     <div style="margin-bottom:12px">
       <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">歌名</div>
       <input id="song-title-input" type="text" placeholder="比如：You And Me" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
@@ -708,12 +717,45 @@ function playSong(id){
   currentSongId=id;
   document.getElementById('player-title').textContent=s.title;
   document.getElementById('player-artist').textContent=s.artist;
+  const art=document.getElementById('album-art');
+  if(s.cover_url){art.innerHTML=`<img src="${s.cover_url}" style="width:100%;height:100%;object-fit:cover">`;}
+  else{art.innerHTML='🎵';}
+  document.getElementById('web-player-wrap').style.display='none';
   document.getElementById('music-iframe').src=`https://music.163.com/outchain/player?type=2&id=${s.song_id}&auto=1&height=66`;
   document.getElementById('music-player').style.display='block';
+  document.getElementById('playlist-label').style.display='block';
   renderSongList();
 }
 
+function toggleWebPlayer(){
+  const wrap=document.getElementById('web-player-wrap');
+  wrap.style.display=wrap.style.display==='none'?'block':'none';
+}
+
+function prevSong(){
+  const idx=songs.findIndex(x=>x.id===currentSongId);
+  if(idx>0)playSong(songs[idx-1].id);
+  else if(songs.length)playSong(songs[songs.length-1].id);
+}
+
+function nextSong(){
+  const idx=songs.findIndex(x=>x.id===currentSongId);
+  if(idx<songs.length-1)playSong(songs[idx+1].id);
+  else if(songs.length)playSong(songs[0].id);
+}
+
+let musicAuthor='sihan';
+
+function setMusicAuthor(a){
+  musicAuthor=a;
+  document.getElementById('music-pick-ji').classList.toggle('active',a==='ji');
+  document.getElementById('music-pick-si').classList.toggle('active',a==='sihan');
+}
+
 function openMusicForm(){
+  musicAuthor='sihan';
+  document.getElementById('music-pick-ji').classList.remove('active');
+  document.getElementById('music-pick-si').classList.add('active');
   document.getElementById('song-title-input').value='';
   document.getElementById('song-artist-input').value='';
   document.getElementById('song-link-input').value='';
@@ -733,7 +775,7 @@ async function saveSong(){
   const btn=document.getElementById('music-save-btn');
   btn.disabled=true;btn.textContent='保存中…';
   try{
-    const r=await fetch(SONGS_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,artist,song_id:songId,added_by:author})});
+    const r=await fetch(SONGS_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,artist,song_id:songId,added_by:musicAuthor})});
     if(r.ok){closeMusicForm();showToast('添加成功 🎵');await loadSongs();}
     else showToast('保存失败，请重试');
   }catch(e){showToast('网络错误');}
