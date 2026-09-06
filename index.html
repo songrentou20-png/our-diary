@@ -276,13 +276,11 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
         </div>
         <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:16px">
           <button onclick="prevSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏮</button>
-          <button onclick="toggleWebPlayer()" style="width:60px;height:60px;border-radius:50%;border:none;background:var(--ji);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 6px 20px rgba(55,138,221,0.4)">♪</button>
+          <button onclick="openInNetease()" style="width:60px;height:60px;border-radius:50%;border:none;background:var(--ji);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:white;box-shadow:0 6px 20px rgba(55,138,221,0.4)">♪</button>
           <button onclick="nextSong()" style="width:44px;height:44px;border-radius:50%;border:1px solid var(--border);background:var(--surface);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2)">⏭</button>
         </div>
-        <div id="web-player-wrap" style="display:none;margin-bottom:8px">
-          <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" width="100%" height="86" style="display:block;border-radius:12px;overflow:hidden" src=""></iframe>
-        </div>
-        <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">点 ♪ 显示网页播放器</div>
+        <iframe id="music-iframe" frameborder="no" border="0" marginwidth="0" marginheight="0" style="position:fixed;left:-9999px;top:-9999px;width:300px;height:86px;pointer-events:none" src=""></iframe>
+        <div style="text-align:center;font-size:12px;color:var(--text3);margin-bottom:16px">点 ♪ 在网易云打开</div>
         <div style="border-top:1px solid var(--border);padding-top:14px">
           <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">播放列表</div>
           <div id="mini-song-list" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -763,7 +761,7 @@ async function playSong(id){
   document.getElementById('music-player').style.display='block';
   document.getElementById('player-title').textContent=s.title;
   document.getElementById('player-artist').textContent=s.artist;
-  document.getElementById('web-player-wrap').style.display='none';
+  document.getElementById('web-player-wrap') && (document.getElementById('web-player-wrap').style.display='none');
   document.getElementById('music-iframe').src=`https://music.163.com/outchain/player?type=2&id=${s.song_id}&auto=1&height=66`;
   // 重置歌词和进度
   lyrics=[];songStartTime=Date.now();songDuration=0;
@@ -813,9 +811,9 @@ function closePlayer(){
   renderSongList();
 }
 
-function toggleWebPlayer(){
-  const wrap=document.getElementById('web-player-wrap');
-  wrap.style.display=wrap.style.display==='none'?'block':'none';
+function openInNetease(){
+  const s=songs.find(x=>x.id===currentSongId);if(!s)return;
+  window.open(`https://music.163.com/#/song?id=${s.song_id}`,'_blank');
 }
 
 function prevSong(){
