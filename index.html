@@ -527,7 +527,7 @@ const MOODS=[
   {id:'sad',label:'伤心',svg:'<circle cx="30" cy="30" r="28" fill="#9BB5D4"/><path d="M17 22 Q22 26 27 22" stroke="#1A2A4A" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M33 22 Q38 26 43 22" stroke="#1A2A4A" stroke-width="2.5" fill="none" stroke-linecap="round"/><ellipse cx="22" cy="28" rx="3" ry="3.5" fill="#1A2A4A"/><ellipse cx="38" cy="28" rx="3" ry="3.5" fill="#1A2A4A"/><path d="M20 42 Q30 35 40 42" stroke="#1A2A4A" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M22 33 L20 40" stroke="#6A9AC4" stroke-width="2" stroke-linecap="round"/><path d="M38 33 L36 40" stroke="#6A9AC4" stroke-width="2" stroke-linecap="round"/>'},
 ];
 
-let entries=[],comments={},author='ji',expanded=new Set(),editing=new Set(),editMoods={},editAuthors={},saving=false,selectedMood=null,showComments=new Set(),savingComment=new Set();
+let entries=[],comments={},author='ji',expanded=new Set(),editing=new Set(),editMoods={},editAuthors={},saving=false,selectedMood=null,showComments=new Set(),savingComment=new Set(),commentAuthors={};
 let calYear=new Date().getFullYear(),calMonth=new Date().getMonth();
 
 function moodSVG(id,size){const m=MOODS.find(x=>x.id===id);if(!m)return'';return`<svg viewBox="0 0 60 60" width="${size}" height="${size}">${m.svg}</svg>`;}
@@ -578,7 +578,7 @@ function renderEntries(list){
       return`<div class="entry"><div class="entry-head"><div class="dot ${isJi?'dot-ji':'dot-si'}"></div><span class="author ${isJi?'author-ji':'author-si'}">${isJi?'霁':'思涵'}</span><span class="entry-date">${fmt(e.created_at)}</span></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><button onclick="setEditAuthor(${e.id},'ji')" style="padding:10px;border-radius:10px;border:1.5px solid ${curAuthor==='ji'?'var(--ji)':'var(--border)'};background:${curAuthor==='ji'?'var(--ji-bg)':'var(--bg)'};color:${curAuthor==='ji'?'var(--ji-text)':'var(--text2)'};font-size:14px;font-weight:500;cursor:pointer">✦ 霁</button><button onclick="setEditAuthor(${e.id},'sihan')" style="padding:10px;border-radius:10px;border:1.5px solid ${curAuthor==='sihan'?'var(--si)':'var(--border)'};background:${curAuthor==='sihan'?'var(--si-bg)':'var(--bg)'};color:${curAuthor==='sihan'?'var(--si-text)':'var(--text2)'};font-size:14px;font-weight:500;cursor:pointer">✿ 思涵</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px">${MOODS.map(m=>`<button onclick="setEditMood(${e.id},'${m.id}')" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;border-radius:8px;border:1.5px solid ${curMood===m.id?'var(--accent)':'var(--border)'};background:${curMood===m.id?'#EAF3FB':'var(--bg)'};cursor:pointer"><svg viewBox="0 0 60 60" width="28" height="28">${m.svg}</svg><span style="font-size:10px;color:var(--text3)">${m.label}</span></button>`).join('')}</div><textarea class="edit-area" id="ea_${e.id}" oninput="onEditInput(${e.id})">${escAttr(e.content)}</textarea><div class="edit-actions"><button class="btn-sm-cancel" onclick="cancelEdit(${e.id})">取消</button><button style="background:#FF7D6B;border:none;border-radius:8px;padding:7px 14px;font-size:14px;cursor:pointer;color:white" onclick="deleteEntry(${e.id})">删除</button><button class="btn-sm-save" id="esave_${e.id}" onclick="saveEdit(${e.id})">保存</button></div></div>`;}
     const entryComments=comments[e.id]||[];
     const showC=showComments.has(e.id);
-    const commentHTML=showC?`<div class="comment-area">${entryComments.map(c=>{const cJi=c.author==='ji';return`<div class="comment-item"><div class="comment-dot ${cJi?'comment-dot-ji':'comment-dot-si'}"></div><div class="comment-text"><span class="comment-author ${cJi?'comment-author-ji':'comment-author-si'}">${cJi?'霁':'思涵'}</span>${esc(c.content)}</div></div>`;}).join('')}<div class="add-comment-row"><input class="comment-input" id="ci_${e.id}" placeholder="写一句批注…" onkeydown="if(event.key==='Enter')addComment(${e.id})"><button class="btn-comment" id="cb_${e.id}" onclick="addComment(${e.id})">发</button></div></div>`:'';
+    const commentHTML=showC?`<div class="comment-area">${entryComments.map(c=>{const cJi=c.author==='ji';return`<div class="comment-item"><div class="comment-dot ${cJi?'comment-dot-ji':'comment-dot-si'}"></div><div class="comment-text"><span class="comment-author ${cJi?'comment-author-ji':'comment-author-si'}">${cJi?'霁':'思涵'}</span>${esc(c.content)}</div></div>`;}).join('')}<div class="add-comment-row"><button onclick="toggleCommentAuthor(${e.id})" id="ca_${e.id}" style="flex-shrink:0;border:1.5px solid var(--border);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;background:var(--bg);color:var(--text2)">${(commentAuthors[e.id]||'ji')==='ji'?'✦ 霁':'✿ 思涵'}</button><input class="comment-input" id="ci_${e.id}" placeholder="写一句批注…" onkeydown="if(event.key==='Enter')addComment(${e.id})"><button class="btn-comment" id="cb_${e.id}" onclick="addComment(${e.id})">发</button></div></div>`:'';
     return`<div class="entry"><div class="entry-head"><div class="dot ${isJi?'dot-ji':'dot-si'}"></div><span class="author ${isJi?'author-ji':'author-si'}">${isJi?'霁':'思涵'}</span>${face?`<span class="mood-face">${face}</span>`:''}<span class="entry-date">${fmt(e.created_at)}</span><button class="edit-btn" onclick="startEdit(${e.id},event)">编辑</button></div><div class="entry-body ${long&&!exp?'clamp':''}">${esc(e.content)}</div>${long?`<button class="expand-btn" onclick="toggleExp(${e.id},event)">${exp?'收起':'展开'}</button>`:''}<button class="comment-toggle" onclick="toggleComments(${e.id},event)">${showC?'收起批注':`批注${entryComments.length?` · ${entryComments.length}`:''}`}</button>${commentHTML}</div>`;
   }).join('')+'</div>';
   entries.forEach(e=>{if(editing.has(e.id)){const ta=document.getElementById('ea_'+e.id);if(ta){ta.style.height='auto';ta.style.height=ta.scrollHeight+'px';}}});
@@ -681,12 +681,18 @@ function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g
 function escAttr(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toggleExp(id,ev){ev.stopPropagation();expanded.has(id)?expanded.delete(id):expanded.add(id);renderFiltered();} 
 function toggleComments(id,ev){ev.stopPropagation();showComments.has(id)?showComments.delete(id):showComments.add(id);renderFiltered();}
+function toggleCommentAuthor(id){
+  commentAuthors[id]=(commentAuthors[id]||'ji')==='ji'?'sihan':'ji';
+  const btn=document.getElementById('ca_'+id);
+  if(btn)btn.textContent=commentAuthors[id]==='ji'?'✦ 霁':'✿ 思涵';
+}
 async function addComment(id){
   const inp=document.getElementById('ci_'+id);
   const btn=document.getElementById('cb_'+id);
   if(!inp||!inp.value.trim())return;
   btn.disabled=true;
-  try{const r=await fetch(CAPI,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({entry_id:id,author,content:inp.value.trim()})});
+  const cAuthor=commentAuthors[id]||'ji';
+  try{const r=await fetch(CAPI,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({entry_id:id,author:cAuthor,content:inp.value.trim()})});
   if(r.ok){inp.value='';await load();}else showToast('发送失败');}
   catch(e){showToast('网络错误');}
   if(btn)btn.disabled=false;
