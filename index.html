@@ -276,9 +276,9 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
       <input id="song-artist-input" type="text" placeholder="比如：Jamvana" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
     </div>
     <div style="margin-bottom:20px">
-      <div style="font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500">网易云分享链接</div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:8px">在网易云找到歌曲 → 分享 → 复制链接，粘贴到这里</div>
-      <input id="song-link-input" type="url" placeholder="https://music.163.com/..." style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500">网易云歌曲ID</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;line-height:1.6">在网易云点歌曲 → 右上角「…」→ 分享 → 复制链接，链接里 <b>id=</b> 后面那串数字就是ID</div>
+      <input id="song-link-input" type="text" inputmode="numeric" placeholder="例：2126747" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
     </div>
     <div class="form-btns">
       <button class="btn-cancel" onclick="closeMusicForm()">取消</button>
@@ -726,10 +726,10 @@ function closeMusicForm(){document.getElementById('music-overlay').classList.rem
 async function saveSong(){
   const title=document.getElementById('song-title-input').value.trim();
   const artist=document.getElementById('song-artist-input').value.trim();
-  const link=document.getElementById('song-link-input').value.trim();
-  if(!title||!artist||!link){showToast('歌名、歌手和链接都要填');return;}
-  const songId=parseSongId(link);
-  if(!songId){showToast('链接格式不对，请重新复制网易云分享链接');return;}
+  const raw=document.getElementById('song-link-input').value.trim();
+  if(!title||!artist||!raw){showToast('歌名、歌手和ID都要填');return;}
+  const songId=raw.match(/\d{4,}/)?raw.match(/\d{4,}/)[0]:null;
+  if(!songId){showToast('ID格式不对，只填数字就行');return;}
   const btn=document.getElementById('music-save-btn');
   btn.disabled=true;btn.textContent='保存中…';
   try{
