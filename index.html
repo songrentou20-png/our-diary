@@ -14,7 +14,7 @@ html{background:#e8eef5}
 :root{--bg:rgba(238,244,250,0.5);--surface:rgba(255,255,255,0.42);--border:rgba(195,212,228,0.45);--text:#2C3A48;--text2:#5A6E7E;--text3:#8FA4B4;--ji:#8EB5D0;--ji-bg:rgba(220,234,245,0.5);--ji-text:#4A7E9A;--si:#C9A0B4;--si-bg:rgba(240,228,236,0.5);--si-text:#8A5870;--accent:#8EB5D0;--r:14px;--glass:rgba(255,255,255,0.38);--glass-border:rgba(255,255,255,0.6)}
 body{font-family:-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:url('./bg.jpg') center/cover fixed;min-height:100vh;color:var(--text);padding-bottom:64px;padding-top:env(safe-area-inset-top)}
 body::before{content:'';position:fixed;inset:0;background:rgba(240,245,252,0.12);pointer-events:none;z-index:0}
-.header{background:rgba(255,255,255,0.28);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.4);padding:16px 20px 14px;position:sticky;top:0;z-index:100}
+.header{background:rgba(255,255,255,0.18);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.3);padding:16px 20px 14px;position:sticky;top:0;z-index:100}
 .header-inner{display:flex;align-items:center;justify-content:center;max-width:480px;margin:0 auto;position:relative}
 .header-inner{display:flex;align-items:center;justify-content:space-between;max-width:480px;margin:0 auto}
 .header-title{font-size:17px;font-weight:600}
@@ -22,7 +22,7 @@ body::before{content:'';position:fixed;inset:0;background:rgba(240,245,252,0.12)
 .write-btn{width:36px;height:36px;background:var(--accent);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .write-btn svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .main{max-width:480px;margin:0 auto;padding:16px 16px 20px}
-.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.25);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,0.45);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.15);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-top:1px solid rgba(255,255,255,0.3);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0;cursor:pointer;border:none;background:none;gap:2px;color:var(--text3);font-size:10px;font-family:inherit}
 .tab-btn.active{color:var(--accent)}
 .tab-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -161,17 +161,17 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
     <!-- 顶部三栏 -->
     <div style="display:flex;gap:8px;margin-bottom:8px">
       <div style="flex:1.2;background:rgba(255,255,255,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,0.65)">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px">霁的心情</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:6px">霁的心情</div>
         <div id="home-ji-mood-face" style="margin-bottom:4px"></div>
         <div id="home-ji-mood-label" style="font-size:11px;color:var(--text2);font-weight:500">—</div>
       </div>
-      <div style="flex:0.85;background:rgba(255,255,255,0.32);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 8px;border:1px solid rgba(255,255,255,0.55);text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:4px">在一起</div>
-        <div style="font-size:26px;font-weight:600;color:var(--ji);line-height:1" id="home-days">…</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:2px">天</div>
+      <div style="flex:0.85;background:rgba(142,181,208,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 8px;border:1px solid rgba(255,255,255,0.5);text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:4px">在一起</div>
+        <div style="font-size:26px;font-weight:600;color:white;line-height:1" id="home-days">…</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px">天</div>
       </div>
       <div style="flex:1.2;background:rgba(255,255,255,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,0.65)">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px">思涵的心情</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:6px">思涵的心情</div>
         <div id="home-si-mood-face" style="margin-bottom:4px"></div>
         <div id="home-si-mood-label" style="font-size:11px;color:var(--text2);font-weight:500">—</div>
       </div>
@@ -185,14 +185,14 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
     <!-- 底部两栏 -->
     <div style="display:flex;gap:8px">
       <div style="flex:1.2;background:rgba(255,255,255,0.38);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,0.58)">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px">纪念日</div>
-        <div id="home-anni-title" style="font-size:11px;color:var(--text2);font-weight:500;margin-bottom:2px">—</div>
-        <div id="home-anni-days" style="font-size:11px;color:var(--ji)">—</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:6px">纪念日</div>
+        <div id="home-anni-title" style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px">—</div>
+        <div id="home-anni-days" style="font-size:11px;color:rgba(255,255,255,0.85)">—</div>
       </div>
       <div style="flex:1.6;background:rgba(255,255,255,0.35);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,0.55)" onclick="switchTab('music')">
-        <div style="font-size:10px;color:var(--text3);margin-bottom:6px">在听</div>
-        <div id="home-song-title" style="font-size:11px;color:var(--text2);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
-        <div id="home-song-artist" style="font-size:10px;color:var(--text3)">点击前往</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:6px">在听</div>
+        <div id="home-song-title" style="font-size:11px;color:var(--text);font-weight:500;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+        <div id="home-song-artist" style="font-size:10px;color:rgba(255,255,255,0.6)">点击前往</div>
       </div>
     </div>
   </div>
