@@ -167,6 +167,7 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
     <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
   </div>
   <div class="cal-grid" id="cal-grid"></div>
+  <div id="mood-stats" style="max-width:480px;margin:20px auto 80px;padding:0 16px"></div>
 </div>
 
 <div id="page-cards" class="page">
@@ -197,6 +198,50 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   </div>
 </div>
 
+<div id="page-anni" class="page">
+  <div style="max-width:480px;margin:0 auto;padding:16px 16px 100px">
+    <div style="text-align:center;font-size:18px;font-weight:600;margin-bottom:20px;color:var(--text)">纪念日 ✨</div>
+    <div id="anni-list"><div class="loading-wrap">加载中…</div></div>
+    <button onclick="openAnniForm()" style="width:100%;margin-top:16px;padding:14px;background:transparent;border:1.5px dashed var(--border);border-radius:14px;font-size:14px;color:var(--text3);cursor:pointer">＋ 添加纪念日</button>
+  </div>
+</div>
+
+<!-- 纪念日添加弹窗 -->
+<div class="overlay" id="anni-overlay" onclick="if(event.target===this)closeAnniForm()">
+  <div class="form-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">添加纪念日</div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">选个图标</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px" id="icon-picker">
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('💑')">💑</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('💕')">💕</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('✨')">✨</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('🎂')">🎂</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('🎉')">🎉</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('🏠')">🏠</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('✈️')">✈️</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('💌')">💌</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('🌙')">🌙</span>
+        <span style="font-size:24px;cursor:pointer" onclick="selectIcon('🌸')">🌸</span>
+      </div>
+      <div style="font-size:13px;color:var(--text3)" id="icon-selected">已选：💕</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">纪念日名称</div>
+      <input id="anni-title-input" type="text" placeholder="比如：我们在一起" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div style="margin-bottom:20px">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:500">日期</div>
+      <input id="anni-date-input" type="date" style="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:15px;color:var(--text);background:var(--bg);outline:none;font-family:inherit">
+    </div>
+    <div class="form-btns">
+      <button class="btn-cancel" onclick="closeAnniForm()">取消</button>
+      <button class="btn-save" id="anni-save-btn" onclick="saveAnni()">保存</button>
+    </div>
+  </div>
+</div>
+
 <!-- 签到弹窗 -->
 <div id="checkin-modal" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.4);align-items:center;justify-content:center">
   <div style="background:var(--bg);border-radius:24px;padding:28px 24px;width:80%;max-width:320px;text-align:center">
@@ -220,6 +265,9 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
   </button>
   <button class="tab-btn" id="tab-cards" onclick="switchTab('cards')">
     <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>卡包
+  </button>
+  <button class="tab-btn" id="tab-anni" onclick="switchTab('anni')">
+    <svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>纪念日
   </button>
 </div>
 
@@ -285,6 +333,7 @@ function switchTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   if(tab==='cal')renderCal();
   if(tab==='cards')refreshCardsPage();
+  if(tab==='anni')loadAnni();
 }
 
 function buildMoodGrid(){
@@ -350,6 +399,7 @@ function renderCal(){
     const faces=dayEs.filter(e=>e.mood).map(e=>`<svg style="width:18px;height:18px" viewBox="0 0 60 60">${MOODS.find(m=>m.id===e.mood)?.svg||''}</svg>`).join('');
     grid.innerHTML+=`<div class="cal-cell${isToday?' today':''}" onclick="openDay(${d})"><div class="cal-day">${d}</div>${faces?`<div style="display:flex;gap:1px;flex-wrap:wrap;justify-content:center">${faces}</div>`:''}</div>`;
   }
+  renderMoodStats();
 }
 
 function changeMonth(dir){
@@ -357,6 +407,46 @@ function changeMonth(dir){
   if(calMonth<0){calMonth=11;calYear--;}
   if(calMonth>11){calMonth=0;calYear++;}
   renderCal();
+}
+
+function renderMoodStats(){
+  const el=document.getElementById('mood-stats');
+  if(!el)return;
+  const monthEntries=entries.filter(e=>{const d=new Date(e.created_at);return d.getFullYear()===calYear&&d.getMonth()===calMonth&&e.mood;});
+  if(!monthEntries.length){el.innerHTML='<div style="text-align:center;padding:20px 0;color:var(--text3);font-size:13px">这个月还没有心情记录</div>';return;}
+  const jiEntries=monthEntries.filter(e=>e.author==='ji');
+  const siEntries=monthEntries.filter(e=>e.author==='sihan');
+  function countMoods(arr){const c={};arr.forEach(e=>{c[e.mood]=(c[e.mood]||0)+1;});return c;}
+  const jiCount=countMoods(jiEntries);
+  const siCount=countMoods(siEntries);
+  const allMoodIds=[...new Set(monthEntries.map(e=>e.mood))];
+  const sorted=allMoodIds.sort((a,b)=>((jiCount[b]||0)+(siCount[b]||0))-((jiCount[a]||0)+(siCount[a]||0)));
+  const maxVal=Math.max(...sorted.map(id=>(jiCount[id]||0)+(siCount[id]||0)),1);
+  function moodRow(id){
+    const m=MOODS.find(x=>x.id===id);if(!m)return'';
+    const jiV=jiCount[id]||0;const siV=siCount[id]||0;const total=jiV+siV;
+    const pct=Math.round(total/maxVal*100);
+    return`<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <svg viewBox="0 0 60 60" width="28" height="28" style="flex-shrink:0">${m.svg}</svg>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:12px;color:var(--text2)">${m.label}</span>
+          <span style="font-size:12px;color:var(--text3)">${jiV?`霁×${jiV} `:''}${siV?`思涵×${siV}`:''}</span>
+        </div>
+        <div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden">
+          <div style="height:100%;border-radius:4px;width:${pct}%;background:linear-gradient(90deg,var(--ji) ${jiV?Math.round(jiV/total*100):0}%,var(--si) ${jiV?Math.round(jiV/total*100):0}%);transition:width 0.4s ease"></div>
+        </div>
+      </div>
+    </div>`;
+  }
+  el.innerHTML=`<div style="background:var(--surface);border-radius:16px;padding:16px;border:1px solid var(--border)">
+    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:16px">本月心情统计 <span style="font-size:12px;font-weight:400;color:var(--text3)">共${monthEntries.length}篇</span></div>
+    <div style="display:flex;gap:16px;margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--ji)"></div><span style="font-size:12px;color:var(--text2)">霁 ${jiEntries.length}篇</span></div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:50%;background:var(--si)"></div><span style="font-size:12px;color:var(--text2)">思涵 ${siEntries.length}篇</span></div>
+    </div>
+    ${sorted.map(moodRow).join('')}
+  </div>`;
 }
 
 function openDay(d){
@@ -524,6 +614,82 @@ async function redeemCard(authorKey){
   const ok=await useCard(authorKey);
   if(ok){showToast('兑换成功！mua~ 💋');await refreshCardsPage();}
   else showToast('卡不够啦，快去写日记签到！');
+}
+
+/* ====== 纪念日 ====== */
+const ANNI_API=SB+'/rest/v1/anniversaries';
+let anniIcon='💕';
+
+function daysDiff(dateStr){
+  const today=new Date();today.setHours(0,0,0,0);
+  const target=new Date(dateStr);target.setHours(0,0,0,0);
+  return Math.round((target-today)/(1000*60*60*24));
+}
+
+async function loadAnni(){
+  try{
+    const r=await fetch(ANNI_API+'?select=*&order=date.asc',{headers:H});
+    const data=await r.json();
+    renderAnni(Array.isArray(data)?data:[]);
+  }catch(e){document.getElementById('anni-list').innerHTML='<div class="empty-wrap"><div class="empty-icon">✨</div><div class="empty-title">加载失败</div></div>';}
+}
+
+function renderAnni(list){
+  const el=document.getElementById('anni-list');
+  if(!list.length){el.innerHTML='<div class="empty-wrap"><div class="empty-icon">💕</div><div class="empty-title">还没有纪念日</div><div class="empty-sub">添加你们的第一个纪念日吧</div></div>';return;}
+  el.innerHTML=list.map(a=>{
+    const diff=daysDiff(a.date);
+    const absDiff=Math.abs(diff);
+    let countLabel,countColor;
+    if(diff===0){countLabel='就是今天！';countColor='var(--si)';}
+    else if(diff>0){countLabel=`还有 ${diff} 天`;countColor='var(--ji)';}
+    else{countLabel=`已经 ${absDiff} 天了`;countColor='var(--text2)';}
+    return`<div style="background:var(--surface);border-radius:16px;padding:16px;border:1px solid var(--border);margin-bottom:12px;display:flex;align-items:center;gap:14px">
+      <div style="font-size:32px;flex-shrink:0">${a.icon||'💕'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px">${esc(a.title)}</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:6px">${a.date}</div>
+        <div style="font-size:20px;font-weight:700;color:${countColor}">${countLabel}</div>
+      </div>
+      <button onclick="deleteAnni(${a.id})" style="background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;flex-shrink:0">×</button>
+    </div>`;
+  }).join('');
+}
+
+function openAnniForm(){
+  anniIcon='💕';
+  document.getElementById('icon-selected').textContent='已选：💕';
+  document.getElementById('anni-title-input').value='';
+  document.getElementById('anni-date-input').value='';
+  document.getElementById('anni-overlay').classList.add('show');
+  setTimeout(()=>document.getElementById('anni-title-input').focus(),300);
+}
+
+function closeAnniForm(){document.getElementById('anni-overlay').classList.remove('show');}
+
+function selectIcon(icon){
+  anniIcon=icon;
+  document.getElementById('icon-selected').textContent='已选：'+icon;
+}
+
+async function saveAnni(){
+  const title=document.getElementById('anni-title-input').value.trim();
+  const date=document.getElementById('anni-date-input').value;
+  if(!title||!date){showToast('名称和日期不能为空');return;}
+  const btn=document.getElementById('anni-save-btn');
+  btn.disabled=true;btn.textContent='保存中…';
+  try{
+    const r=await fetch(ANNI_API,{method:'POST',headers:{...H,'Prefer':'return=representation'},body:JSON.stringify({title,date,icon:anniIcon})});
+    if(r.ok){closeAnniForm();showToast('添加成功 ✓');await loadAnni();}
+    else showToast('保存失败，请重试');
+  }catch(e){showToast('网络错误');}
+  btn.disabled=false;btn.textContent='保存';
+}
+
+async function deleteAnni(id){
+  if(!confirm('确定删除这个纪念日吗？'))return;
+  try{await fetch(ANNI_API+'?id=eq.'+id,{method:'DELETE',headers:H});showToast('已删除');await loadAnni();}
+  catch(e){showToast('删除失败');}
 }
 </script>
 </body>
