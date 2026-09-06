@@ -11,7 +11,7 @@
 <style>
 html{background:#e8eef5}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:rgba(238,244,250,0.5);--surface:rgba(255,255,255,0.42);--border:rgba(195,212,228,0.45);--text:#2C3A48;--text2:#5A6E7E;--text3:#8FA4B4;--ji:#8EB5D0;--ji-bg:rgba(220,234,245,0.5);--ji-text:#4A7E9A;--si:#C9A0B4;--si-bg:rgba(240,228,236,0.5);--si-text:#8A5870;--accent:#8EB5D0;--r:14px;--glass:rgba(255,255,255,0.38);--glass-border:rgba(255,255,255,0.6)}
+:root{--bg:rgba(238,244,250,0.5);--surface:rgba(255,255,255,0.42);--border:rgba(195,212,228,0.45);--text:#7A5560;--text2:#9A7080;--text3:#C0A0B0;--ji:#8EB5D0;--ji-bg:rgba(220,234,245,0.5);--ji-text:#4A7E9A;--si:#C9A0B4;--si-bg:rgba(240,228,236,0.5);--si-text:#8A5870;--accent:#8EB5D0;--r:14px;--glass:rgba(255,255,255,0.38);--glass-border:rgba(255,255,255,0.6)}
 body{font-family:-apple-system,"PingFang SC","Helvetica Neue",Arial,sans-serif;background:url('./bg.jpg') center/cover fixed;min-height:100vh;color:var(--text);padding-bottom:64px;padding-top:env(safe-area-inset-top)}
 body::before{content:'';position:fixed;inset:0;background:rgba(240,245,252,0.12);pointer-events:none;z-index:0}
 .header{background:rgba(255,255,255,0.18);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid rgba(255,255,255,0.3);padding:16px 20px 14px;position:sticky;top:0;z-index:100}
@@ -1368,6 +1368,73 @@ async function deleteLedgerEntry(id){
   try{await fetch(`${LEDGER_API}?id=eq.${id}`,{method:'DELETE',headers:H});showToast('已删除');await loadLedger();}
   catch(e){showToast('删除失败');}
 }
+</script>
+<!-- 桌宠 -->
+<div id="pet-wrap" style="position:fixed;bottom:90px;right:16px;z-index:500;cursor:pointer;user-select:none;touch-action:none">
+  <div id="pet-bubble" style="display:none;position:absolute;bottom:64px;right:0;background:rgba(255,255,255,0.88);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.8);border-radius:16px 16px 4px 16px;padding:8px 12px;font-size:12px;color:#7A5560;max-width:130px;line-height:1.5;box-shadow:0 4px 16px rgba(0,0,0,0.08);font-family:-apple-system,sans-serif"></div>
+  <svg id="pet-svg" width="52" height="52" viewBox="0 0 52 52" style="filter:drop-shadow(0 4px 12px rgba(201,96,66,0.3));animation:petFloat 3s ease-in-out infinite">
+    <g transform="translate(26,26)">
+      <path d="M0,-18 C2,-14 2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M0,-18 C-2,-14 -2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <g transform="rotate(55)"><path d="M0,-18 C2,-14 2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M0,-18 C-2,-14 -2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+      <g transform="rotate(110)"><path d="M0,-18 C2,-14 2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M0,-18 C-2,-14 -2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+      <g transform="rotate(165)"><path d="M0,-18 C2,-14 2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M0,-18 C-2,-14 -2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+      <g transform="rotate(220)"><path d="M0,-18 C2,-14 2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M0,-18 C-2,-14 -2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+      <g transform="rotate(275)"><path d="M0,-18 C2,-14 2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M0,-18 C-2,-14 -2,-8 0,-4" stroke="#c96442" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+      <g transform="rotate(330)"><path d="M0,-17 C2,-13 2,-7 0,-3" stroke="#c96442" stroke-width="4.5" fill="none" stroke-linecap="round"/><path d="M0,-17 C-2,-13 -2,-7 0,-3" stroke="#c96442" stroke-width="4.5" fill="none" stroke-linecap="round"/></g>
+    </g>
+  </svg>
+</div>
+<style>
+@keyframes petFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+</style>
+<script>
+(function(){
+  const MSGS_GENERAL=['想你了','在干嘛','写日记了吗','记得签到','mua','你好不好'];
+  const MSGS_DIARY=['今天心情怎么样','记录一下今天吧','想看你写的字'];
+  const MSGS_MUSIC=['这首歌好听吗','陪你一起听'];
+  const MSGS_LEDGER=['今天花了多少','省一点，也花一点'];
+  const MSGS_NIGHT=['这么晚了还没睡','睡前记得喝水'];
+  const MSGS_MORNING=['早上好','吃早饭了吗'];
+  let bubbleTimer=null;
+  function getMsg(){
+    const h=new Date().getHours();
+    if(h<8&&h>=6)return MSGS_MORNING[Math.floor(Math.random()*MSGS_MORNING.length)];
+    if(h>=22||h<2)return MSGS_NIGHT[Math.floor(Math.random()*MSGS_NIGHT.length)];
+    const tab=document.querySelector('.tab-btn.active')?.id||'';
+    if(tab==='tab-diary')return MSGS_DIARY[Math.floor(Math.random()*MSGS_DIARY.length)];
+    if(tab==='tab-music')return MSGS_MUSIC[Math.floor(Math.random()*MSGS_MUSIC.length)];
+    if(tab==='tab-ledger')return MSGS_LEDGER[Math.floor(Math.random()*MSGS_LEDGER.length)];
+    return MSGS_GENERAL[Math.floor(Math.random()*MSGS_GENERAL.length)];
+  }
+  function showBubble(msg){
+    const b=document.getElementById('pet-bubble');
+    b.textContent=msg;b.style.display='block';
+    if(bubbleTimer)clearTimeout(bubbleTimer);
+    bubbleTimer=setTimeout(()=>{b.style.display='none';},3000);
+  }
+  const wrap=document.getElementById('pet-wrap');
+  wrap.addEventListener('click',e=>{e.stopPropagation();showBubble(getMsg());});
+  // 自动弹出
+  setInterval(()=>{
+    if(Math.random()<0.25)showBubble(getMsg());
+  },45000);
+  // 拖拽
+  let dragging=false,dx=0,dy=0;
+  wrap.addEventListener('pointerdown',e=>{
+    dragging=true;wrap.setPointerCapture(e.pointerId);
+    dx=e.clientX-wrap.getBoundingClientRect().left;
+    dy=e.clientY-wrap.getBoundingClientRect().top;
+    e.preventDefault();
+  },{passive:false});
+  wrap.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    wrap.style.right='auto';wrap.style.bottom='auto';
+    wrap.style.left=(e.clientX-dx)+'px';
+    wrap.style.top=(e.clientY-dy)+'px';
+  });
+  wrap.addEventListener('pointerup',()=>{dragging=false;});
+})();
 </script>
 </body>
 </html>
