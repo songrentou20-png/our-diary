@@ -1376,33 +1376,37 @@ async function deleteLedgerEntry(id){
 }
 </script>
 <!-- 桌宠 -->
-<div id="pet-wrap" style="position:fixed;bottom:100px;right:24px;z-index:500;touch-action:none;cursor:pointer">
-  <div id="pet-bubble" style="display:none;position:absolute;bottom:72px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.8);border-radius:12px;padding:6px 12px;font-size:12px;color:#7A5560;white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,0.08);font-family:-apple-system,sans-serif;pointer-events:none"></div>
-  <svg id="pet-svg" width="56" height="64" viewBox="0 0 56 64" style="display:block">
-    <!-- body -->
-    <rect id="pet-body" x="8" y="8" width="40" height="30" rx="4" fill="#c96442"/>
-    <!-- eyes -->
-    <g id="pet-eyes">
-      <rect x="16" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/>
-      <rect x="32" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/>
-    </g>
-    <!-- mouth -->
-    <g id="pet-mouth">
-      <rect x="21" y="30" width="14" height="3" rx="1.5" fill="#2C1A0E" opacity="0.5"/>
-    </g>
-    <!-- legs -->
-    <rect x="14" y="38" width="8" height="14" rx="2" fill="#c96442" id="pet-leg-l"/>
-    <rect x="34" y="38" width="8" height="14" rx="2" fill="#c96442" id="pet-leg-r"/>
-    <!-- cheeks -->
-    <rect x="10" y="26" width="8" height="5" rx="2.5" fill="#E8855A" opacity="0.4" id="pet-cheek-l"/>
-    <rect x="38" y="26" width="8" height="5" rx="2.5" fill="#E8855A" opacity="0.4" id="pet-cheek-r"/>
+<div id="pet-wrap" style="position:fixed;left:calc(100vw - 90px);top:calc(100vh - 200px);z-index:500;touch-action:none;cursor:pointer;user-select:none;will-change:transform">
+  <div id="pet-bubble" style="display:none;position:absolute;bottom:82px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,0.95);backdrop-filter:blur(12px);border:1.5px solid rgba(255,200,180,0.5);border-radius:14px;padding:7px 13px;font-size:11.5px;color:#7A5560;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.1);font-family:-apple-system,sans-serif;pointer-events:none;max-width:150px;white-space:normal;text-align:center;line-height:1.5"></div>
+  <div id="pet-accessory" style="position:absolute;bottom:74px;left:50%;transform:translateX(-50%);font-size:16px;display:none"></div>
+  <svg id="pet-svg" width="64" height="72" viewBox="0 0 64 72" style="display:block;image-rendering:pixelated">
+    <!-- 像素Claw'd：方块蟹爪（左右伸出） -->
+    <!-- 左爪 -->
+    <rect id="claw-l" x="0" y="20" width="12" height="12" fill="#C96442"/>
+    <!-- 右爪 -->
+    <rect id="claw-r" x="52" y="20" width="12" height="12" fill="#C96442"/>
+    <!-- 身体 -->
+    <rect id="pet-body" x="10" y="12" width="44" height="36" fill="#C96442"/>
+    <!-- 眼睛 -->
+    <rect id="eye-l" x="18" y="22" width="10" height="10" fill="#1a1008"/>
+    <rect id="eye-r" x="36" y="22" width="10" height="10" fill="#1a1008"/>
+    <!-- 嘴（默认隐藏，表情时显示） -->
+    <rect id="pet-mouth" x="24" y="38" width="16" height="4" fill="#1a1008" opacity="0"/>
+    <!-- 腿 -->
+    <rect id="leg1" x="13" y="48" width="9" height="16" fill="#C96442"/>
+    <rect id="leg2" x="25" y="48" width="9" height="16" fill="#C96442"/>
+    <rect id="leg3" x="37" y="48" width="9" height="16" fill="#C96442"/>
+    <rect id="leg4" x="49" y="48" width="9" height="16" fill="#C96442"/>
+    <!-- 腮红（害羞时） -->
+    <rect id="cheek-l" x="11" y="34" width="8" height="5" fill="#e8855a" opacity="0"/>
+    <rect id="cheek-r" x="45" y="34" width="8" height="5" fill="#e8855a" opacity="0"/>
   </svg>
 </div>
 
 <style>
-@keyframes petWalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-@keyframes petHide{0%{transform:scaleX(1)}100%{transform:scaleX(0.1)}}
-@keyframes legWalk{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes petBob2{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes sleeping2{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+@keyframes bubblePop2{0%{transform:translateX(-50%) scale(0.5);opacity:0}60%{transform:translateX(-50%) scale(1.08)}100%{transform:translateX(-50%) scale(1);opacity:1}}
 </style>
 
 <script>
@@ -1410,199 +1414,266 @@ async function deleteLedgerEntry(id){
   const wrap=document.getElementById('pet-wrap');
   const svg=document.getElementById('pet-svg');
   const bubble=document.getElementById('pet-bubble');
-  const legL=document.getElementById('pet-leg-l');
-  const legR=document.getElementById('pet-leg-r');
-  const eyes=document.getElementById('pet-eyes');
-  const mouth=document.getElementById('pet-mouth');
+  const accessory=document.getElementById('pet-accessory');
   const body=document.getElementById('pet-body');
+  const eyeL=document.getElementById('eye-l');
+  const eyeR=document.getElementById('eye-r');
+  const petMouth=document.getElementById('pet-mouth');
+  const leg1=document.getElementById('leg1');
+  const leg2=document.getElementById('leg2');
+  const leg3=document.getElementById('leg3');
+  const leg4=document.getElementById('leg4');
+  const cheekL=document.getElementById('cheek-l');
+  const cheekR=document.getElementById('cheek-r');
+  const clawL=document.getElementById('claw-l');
+  const clawR=document.getElementById('claw-r');
 
-  let px=window.innerWidth-80, py=window.innerHeight-200;
-  let vx=0.6, vy=0;
-  let isDragging=false, dragOX=0, dragOY=0;
-  let isHiding=false, hideTimer=null, bubbleTimer=null;
-  let expr='normal', walkPhase=0;
+  // 位置用绝对像素，不用right/bottom
+  let px=window.innerWidth-90;
+  let py=window.innerHeight-200;
+  let isDragging=false,dragOX=0,dragOY=0;
+  let behavior='idle',bDur=3000,bElapsed=0;
+  let targetX=px,targetY=py;
+  let legPhase=0,facingLeft=false;
+  let bubbleTimer=null,clickCount=0;
+  let lastTs=performance.now();
 
-  const EXPRS={
-    normal:{eyes:'<rect x="16" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/><rect x="32" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/>',mouth:'<rect x="21" y="30" width="14" height="3" rx="1.5" fill="#2C1A0E" opacity="0.5"/>'},
-    happy:{eyes:'<path d="M16 21 Q20 17 24 21" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M32 21 Q36 17 40 21" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>',mouth:'<path d="M20 30 Q28 36 36 30" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>'},
-    sad:{eyes:'<path d="M16 19 Q20 23 24 19" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M32 19 Q36 23 40 19" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>',mouth:'<path d="M20 34 Q28 30 36 34" stroke="#2C1A0E" stroke-width="2" fill="none" stroke-linecap="round"/>'},
-    sleepy:{eyes:'<rect x="16" y="20" width="8" height="4" rx="1" fill="#2C1A0E"/><rect x="32" y="20" width="8" height="4" rx="1" fill="#2C1A0E"/>',mouth:'<rect x="23" y="31" width="10" height="2.5" rx="1.2" fill="#2C1A0E" opacity="0.4"/>'},
-    excited:{eyes:'<rect x="14" y="15" width="11" height="11" rx="1.5" fill="#2C1A0E"/><rect x="31" y="15" width="11" height="11" rx="1.5" fill="#2C1A0E"/><rect x="15.5" y="16.5" width="3" height="3" rx="0.5" fill="white"/><rect x="32.5" y="16.5" width="3" height="3" rx="0.5" fill="white"/>',mouth:'<path d="M19 31 Q28 38 37 31" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>'},
-    wink:{eyes:'<rect x="16" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/><path d="M32 21 Q36 17 40 21" stroke="#2C1A0E" stroke-width="2.5" fill="none" stroke-linecap="round"/>',mouth:'<path d="M21 31 Q28 35 35 31" stroke="#2C1A0E" stroke-width="1.8" fill="none" stroke-linecap="round"/>'},
-    shy:{eyes:'<rect x="16" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/><rect x="32" y="17" width="8" height="8" rx="1" fill="#2C1A0E"/>',mouth:'<rect x="23" y="31" width="10" height="2.5" rx="1.2" fill="#2C1A0E" opacity="0.4"/>'},
-  };
-
-  const MSGS={
-    home:['在呢','想你了','最近怎么样','写日记了吗'],
-    diary:['今天写什么','心情不错呀','记录下来吧'],
-    music:['这首好听','一起听嘛','我也喜欢这首'],
-    ledger:['花了多少','省着点哦','记一下吧'],
-    anni:['快到了！','纪念日要准备'],
-    general:['嗯…','？','在干嘛'],
-  };
-
-  function setExpr(e){
-    expr=e;
-    eyes.innerHTML=EXPRS[e].eyes;
-    mouth.innerHTML=EXPRS[e].mouth;
-  }
-
-  function showBubble(msg){
-    bubble.textContent=msg;bubble.style.display='block';
-    if(bubbleTimer)clearTimeout(bubbleTimer);
-    bubbleTimer=setTimeout(()=>bubble.style.display='none',3200);
-  }
-
-  function getMsg(){
-    const tab=document.querySelector('.tab-btn.active')?.id||'';
-    const h=new Date().getHours();
-    if(h>=23||h<6)return['眠了…','zzz…','困了'][Math.floor(Math.random()*3)];
-    if(tab.includes('music'))return MSGS.music[Math.floor(Math.random()*MSGS.music.length)];
-    if(tab.includes('diary'))return MSGS.diary[Math.floor(Math.random()*MSGS.diary.length)];
-    if(tab.includes('ledger'))return MSGS.ledger[Math.floor(Math.random()*MSGS.ledger.length)];
-    if(tab.includes('anni'))return MSGS.anni[Math.floor(Math.random()*MSGS.anni.length)];
-    if(tab.includes('home'))return MSGS.home[Math.floor(Math.random()*MSGS.home.length)];
-    return MSGS.general[Math.floor(Math.random()*MSGS.general.length)];
-  }
-
-  function randomExpr(){
-    const exprs=['happy','excited','wink','shy','normal','normal'];
-    return exprs[Math.floor(Math.random()*exprs.length)];
-  }
-
-  // 位置更新
-  function updatePos(){
+  function applyPos(){
     wrap.style.left=px+'px';
     wrap.style.top=py+'px';
-    wrap.style.right='auto';
-    wrap.style.bottom='auto';
-  }
-  wrap.style.left=px+'px';
-  wrap.style.top=py+'px';
-  wrap.style.right='auto';
-  wrap.style.bottom='auto';
-
-  // 走路动画
-  let walkTick=0;
-  function animLegs(){
-    walkTick++;
-    const t=Math.sin(walkTick*0.15);
-    legL.setAttribute('transform',`translate(0,${t>0?t*3:0})`);
-    legR.setAttribute('transform',`translate(0,${t<0?-t*3:0})`);
-    svg.style.transform=`translateY(${Math.sin(walkTick*0.1)*2}px)`;
   }
 
-  // 主循环
-  function loop(){
-    if(!isDragging&&!isHiding){
-      px+=vx;py+=vy;
-      // 边界弹
-      const maxX=window.innerWidth-60,maxY=window.innerHeight-80;
-      if(px<0){px=0;vx=Math.abs(vx);setExpr('surprised')||setExpr('happy');}
-      if(px>maxX){px=maxX;vx=-Math.abs(vx);}
-      if(py<50){py=50;vy=Math.abs(vy);}
-      if(py>maxY){py=maxY;vy=-Math.abs(vy);}
-      updatePos();
-      animLegs();
-      // 随机改变方向
-      if(Math.random()<0.004){vx=(Math.random()-0.5)*1.5;vy=(Math.random()-0.5)*0.8;}
+  function clamp(){
+    px=Math.max(0,Math.min(window.innerWidth-68,px));
+    py=Math.max(60,Math.min(window.innerHeight-80,py));
+  }
+
+  function setFacing(left){
+    if(facingLeft===left)return;
+    facingLeft=left;
+    svg.style.transform=left?'scaleX(-1)':'scaleX(1)';
+  }
+
+  // 表情
+  function setExpr(name){
+    // 重置
+    eyeL.setAttribute('y','22');eyeL.setAttribute('height','10');eyeL.setAttribute('width','10');
+    eyeR.setAttribute('y','22');eyeR.setAttribute('height','10');eyeR.setAttribute('width','10');
+    petMouth.setAttribute('opacity','0');
+    cheekL.setAttribute('opacity','0');cheekR.setAttribute('opacity','0');
+
+    if(name==='happy'){
+      // 眼睛变成小弧形（用细条模拟）
+      eyeL.setAttribute('height','4');eyeL.setAttribute('y','26');
+      eyeR.setAttribute('height','4');eyeR.setAttribute('y','26');
+      petMouth.setAttribute('opacity','1');petMouth.setAttribute('y','38');petMouth.setAttribute('height','3');
+    } else if(name==='sad'){
+      eyeL.setAttribute('height','3');eyeL.setAttribute('y','28');
+      eyeR.setAttribute('height','3');eyeR.setAttribute('y','28');
+      petMouth.setAttribute('opacity','0.6');petMouth.setAttribute('y','42');
+    } else if(name==='sleepy'){
+      eyeL.setAttribute('height','3');eyeL.setAttribute('y','26');eyeL.setAttribute('width','10');
+      eyeR.setAttribute('height','3');eyeR.setAttribute('y','26');eyeR.setAttribute('width','10');
+    } else if(name==='surprised'){
+      eyeL.setAttribute('width','12');eyeL.setAttribute('height','12');eyeL.setAttribute('y','20');
+      eyeR.setAttribute('width','12');eyeR.setAttribute('height','12');eyeR.setAttribute('y','20');
+      petMouth.setAttribute('opacity','1');petMouth.setAttribute('width','8');petMouth.setAttribute('x','28');
+    } else if(name==='shy'){
+      eyeL.setAttribute('height','4');eyeL.setAttribute('y','26');
+      eyeR.setAttribute('height','4');eyeR.setAttribute('y','26');
+      cheekL.setAttribute('opacity','0.6');cheekR.setAttribute('opacity','0.6');
+    } else if(name==='working'){
+      eyeL.setAttribute('x','20');eyeL.setAttribute('width','8');
+      eyeR.setAttribute('x','38');eyeR.setAttribute('width','8');
     }
+    // normal: 保持默认
+  }
+
+  function showBubble(txt,dur=2800){
+    clearTimeout(bubbleTimer);
+    bubble.textContent=txt;
+    bubble.style.display='block';
+    bubble.style.animation='none';
+    void bubble.offsetWidth;
+    bubble.style.animation='bubblePop2 0.3s ease';
+    bubbleTimer=setTimeout(()=>{bubble.style.display='none';},dur);
+  }
+
+  function showAcc(e,dur=5000){
+    accessory.textContent=e;accessory.style.display='block';
+    setTimeout(()=>accessory.style.display='none',dur);
+  }
+
+  function getTab(){
+    const a=document.querySelector('.tab-btn.active,[class*="tab"][class*="active"]');
+    if(!a)return'home';
+    const t=a.textContent||'';
+    if(t.includes('日记'))return'diary';
+    if(t.includes('日历'))return'calendar';
+    if(t.includes('卡包'))return'cards';
+    if(t.includes('小窝'))return'home';
+    if(t.includes('纪念'))return'anniversaries';
+    if(t.includes('听'))return'music';
+    if(t.includes('记账'))return'ledger';
+    return'home';
+  }
+
+  const TAB_LINES={
+    diary:['在写日记吗～','把今天的心情记下来！','我也想知道你今天怎样','记录每一天都很重要'],
+    calendar:['心情瓶子满了吗？','这个月怎么样？','好多颜色！'],
+    cards:['亲亲卡！','要不要兑换？','今天签到了吗～','mua！'],
+    home:['好温暖的小窝～','想你了♡','这里是我们的地方','在一起好幸福～'],
+    anniversaries:['还有好多期待！','纪念日快到了？','每一天都算数！'],
+    music:['好听！','一起听，心情好～','♪♪♪','你喜欢这首吗？'],
+    ledger:['今天花了多少？','记账记账～','要存钱！']
+  };
+  const RANDOMS=['你好呀！','嗒嗒嗒～','看我！','嘿嘿～','给你爱心♡','发现我了！','不许走！','我在想你','今天也要加油！','嘻嘻～'];
+
+  function isLateNight(){const h=new Date().getHours();return h>=23||h<5;}
+
+  function animLegs(fast){
+    legPhase+=fast?0.22:0.12;
+    const a=Math.sin(legPhase)*(fast?7:5);
+    const b=Math.sin(legPhase+Math.PI)*(fast?7:5);
+    leg1.setAttribute('transform',`translate(0,${a})`);
+    leg2.setAttribute('transform',`translate(0,${b})`);
+    leg3.setAttribute('transform',`translate(0,${a})`);
+    leg4.setAttribute('transform',`translate(0,${b})`);
+  }
+  function resetLegs(){[leg1,leg2,leg3,leg4].forEach(l=>l.removeAttribute('transform'));legPhase=0;}
+
+  function pickBehavior(){
+    bElapsed=0;
+    if(isLateNight()){
+      behavior='sleep';bDur=12000;
+      setExpr('sleepy');svg.style.animation='sleeping2 2.5s ease-in-out infinite';resetLegs();
+      showAcc('💤',10000);return;
+    }
+    const r=Math.random();
+    if(r<0.2){behavior='idle';bDur=2000+Math.random()*3000;setExpr('normal');svg.style.animation='petBob2 2s ease-in-out infinite';resetLegs();}
+    else if(r<0.42){
+      behavior='walk';bDur=3000+Math.random()*5000;svg.style.animation='none';setExpr('normal');
+      targetX=30+Math.random()*(window.innerWidth-120);
+      targetY=80+Math.random()*(window.innerHeight-220);
+    }
+    else if(r<0.56){
+      behavior='run';bDur=1800+Math.random()*2200;svg.style.animation='none';setExpr('happy');
+      targetX=30+Math.random()*(window.innerWidth-120);
+      targetY=80+Math.random()*(window.innerHeight-220);
+    }
+    else if(r<0.65){
+      behavior='hide';bDur=6000;svg.style.animation='none';setExpr('shy');
+      targetX=Math.random()<0.5?-70:window.innerWidth+10;
+      targetY=py;
+    }
+    else if(r<0.76){
+      behavior='work';bDur=5000+Math.random()*4000;
+      setExpr('working');svg.style.animation='petBob2 1.5s ease-in-out infinite';resetLegs();
+      showAcc('💻',bDur-500);
+    }
+    else if(r<0.87){
+      behavior='play';bDur=3000+Math.random()*3000;
+      setExpr('happy');svg.style.animation='petBob2 1s ease-in-out infinite';resetLegs();
+      showAcc(['🎮','⭐','🎲','🧸','🪀'][Math.floor(Math.random()*5)],bDur-500);
+    }
+    else{
+      behavior='talk';bDur=3500;
+      setExpr('happy');svg.style.animation='petBob2 1s ease-in-out infinite';
+      const lines=[...(TAB_LINES[getTab()]||[]),...RANDOMS];
+      showBubble(lines[Math.floor(Math.random()*lines.length)]);
+    }
+  }
+
+  function loop(ts){
+    const dt=Math.min(ts-lastTs,60);lastTs=ts;
+    if(isDragging){requestAnimationFrame(loop);return;}
+    bElapsed+=dt;
+    if(bElapsed>=bDur)pickBehavior();
+
+    if(behavior==='walk'||behavior==='run'){
+      const spd=behavior==='run'?5.5:2.2;
+      const dx=targetX-px,dy=targetY-py;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>6){
+        px+=dx/dist*spd;py+=dy/dist*spd;
+        setFacing(dx<0);animLegs(behavior==='run');
+      } else {behavior='idle';bElapsed=bDur;resetLegs();}
+    }
+    else if(behavior==='hide'){
+      const dx=targetX-px,dy=targetY-py;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist>6){px+=dx/dist*7;setFacing(dx<0);animLegs(true);}
+      else{
+        behavior='waiting';
+        setTimeout(()=>{
+          px=60+Math.random()*(window.innerWidth-150);
+          py=80+Math.random()*(window.innerHeight-200);
+          clamp();applyPos();pickBehavior();
+        },1800);
+      }
+    }
+    clamp();applyPos();
     requestAnimationFrame(loop);
   }
-  requestAnimationFrame(loop);
-
-  // 偶尔躲起来
-  function scheduleHide(){
-    const delay=30000+Math.random()*60000;
-    setTimeout(()=>{
-      if(!isDragging){
-        isHiding=true;
-        setExpr('wink');
-        // 躲到边缘
-        const edge=Math.floor(Math.random()*2);
-        const targetX=edge===0?-50:window.innerWidth+10;
-        const dur=2000;const startX=px;
-        const start=Date.now();
-        function slideOut(){
-          const t=Math.min(1,(Date.now()-start)/dur);
-          px=startX+(targetX-startX)*t;
-          updatePos();
-          if(t<1){requestAnimationFrame(slideOut);}
-          else{
-            showBubble('找我呀~');
-            // 2秒后缩小
-            svg.style.transform='scale(0)';svg.style.transition='transform 0.3s';
-            hideTimer=setTimeout(()=>{
-              // 30秒后自动回来
-              hideTimer=setTimeout(()=>{
-                isHiding=false;
-                px=window.innerWidth/2;py=window.innerHeight/2;
-                updatePos();
-                svg.style.transform='scale(1)';
-                setExpr('excited');showBubble('找到了！');
-                scheduleHide();
-              },30000);
-            },300);
-          }
-        }
-        requestAnimationFrame(slideOut);
-      }else{scheduleHide();}
-    },delay);
-  }
-  scheduleHide();
-
-  // 点击
-  wrap.addEventListener('click',e=>{
-    if(isDragging)return;
-    if(isHiding){
-      // 找到了
-      if(hideTimer)clearTimeout(hideTimer);
-      isHiding=false;
-      svg.style.transform='scale(1)';svg.style.transition='transform 0.4s cubic-bezier(.4,2,.6,1)';
-      const e2=randomExpr();setExpr(e2);
-      const msgs=['！','找到啦','嘿嘿','哼'];
-      showBubble(msgs[Math.floor(Math.random()*msgs.length)]);
-      scheduleHide();return;
-    }
-    const e3=randomExpr();setExpr(e3);
-    showBubble(getMsg());
-    setTimeout(()=>setExpr('normal'),3000);
-  });
 
   // 拖拽
-  let hasMoved=false;
-  wrap.addEventListener('pointerdown',e=>{
-    isDragging=true;hasMoved=false;
+  wrap.addEventListener('pointerdown',(e)=>{
+    isDragging=true;
+    const r=wrap.getBoundingClientRect();
+    dragOX=e.clientX-r.left;dragOY=e.clientY-r.top;
     wrap.setPointerCapture(e.pointerId);
-    dragOX=e.clientX-px;dragOY=e.clientY-py;
-    setExpr('surprised')||setExpr('excited');
+    svg.style.animation='none';
     e.preventDefault();
-  },{passive:false});
-  wrap.addEventListener('pointermove',e=>{
+  });
+  window.addEventListener('pointermove',(e)=>{
     if(!isDragging)return;
-    hasMoved=true;
     px=e.clientX-dragOX;py=e.clientY-dragOY;
-    updatePos();
+    clamp();applyPos();
   });
-  wrap.addEventListener('pointerup',()=>{
-    isDragging=false;
-    if(hasMoved){setExpr('wink');setTimeout(()=>setExpr('normal'),1500);}
-    vx=(Math.random()-0.5)*1.2;vy=-Math.abs(Math.random()*0.5);
-  });
-
-  // 自动说话
-  setInterval(()=>{
-    if(!isDragging&&!isHiding&&Math.random()<0.3){
-      const h=new Date().getHours();
-      if(h>=23||h<6){setExpr('sleepy');showBubble('zzz…');}
-      else{setExpr(randomExpr());showBubble(getMsg());}
-      setTimeout(()=>setExpr('normal'),3000);
+  window.addEventListener('pointerup',()=>{
+    if(isDragging){
+      isDragging=false;
+      setExpr('surprised');
+      showBubble('哇！放我下来！',1200);
+      setTimeout(()=>setExpr('normal'),1400);
     }
-  },40000);
+  });
 
-  setExpr('happy');
-  setTimeout(()=>{showBubble('你好呀~');},800);
+  // 点击
+  wrap.addEventListener('click',()=>{
+    if(isDragging)return;
+    clickCount++;
+    if(clickCount>=3){
+      clickCount=0;
+      behavior='hide';bDur=5000;bElapsed=0;
+      targetX=Math.random()<0.5?-70:window.innerWidth+10;
+      targetY=py;
+      setExpr('shy');svg.style.animation='none';
+      showBubble('找我呀！捉迷藏！',1500);
+      return;
+    }
+    setExpr('happy');
+    setTimeout(()=>setExpr('normal'),1500);
+    const lines=[...(TAB_LINES[getTab()]||[]),...RANDOMS];
+    showBubble(lines[Math.floor(Math.random()*lines.length)]);
+  });
+
+  // 定时说话
+  setInterval(()=>{
+    if(isDragging||behavior==='sleep'||behavior==='hide')return;
+    if(Math.random()<0.35){
+      const lines=[...(TAB_LINES[getTab()]||[]),...RANDOMS];
+      setExpr('happy');
+      showBubble(lines[Math.floor(Math.random()*lines.length)]);
+      setTimeout(()=>setExpr('normal'),1800);
+    }
+  },20000);
+
+  clamp();applyPos();
+  pickBehavior();
+  requestAnimationFrame(loop);
 })();
+</script>
 </script>
 </body>
 </html>
