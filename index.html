@@ -1562,9 +1562,16 @@ async function deleteLedgerEntry(id){
       targetY=80+Math.random()*(window.innerHeight-220);
     }
     else if(r<0.65){
-      behavior='hide';bDur=6000;svg.style.animation='none';setExpr('shy');
-      targetX=Math.random()<0.5?-70:window.innerWidth+10;
-      targetY=py;
+      behavior='hiding';bDur=6000;bElapsed=0;
+      setExpr('shy');svg.style.animation='none';resetLegs();
+      showBubble('藏起来了～',1200);
+      wrap.style.transition='opacity 0.5s';wrap.style.opacity='0';
+      setTimeout(()=>{
+        px=40+Math.random()*(window.innerWidth-160);
+        py=80+Math.random()*(window.innerHeight-200);
+        clamp();applyPos();
+        setTimeout(()=>{wrap.style.opacity='1';setExpr('happy');showBubble('找到我了吗？',2000);setTimeout(()=>{setExpr('normal');wrap.style.transition='';pickBehavior();},2200);},800);
+      },1500);
     }
     else if(r<0.76){
       behavior='work';bDur=5000+Math.random()*4000;
@@ -1599,19 +1606,7 @@ async function deleteLedgerEntry(id){
         setFacing(dx<0);animLegs(behavior==='run');
       } else {behavior='idle';bElapsed=bDur;resetLegs();}
     }
-    else if(behavior==='hide'){
-      const dx=targetX-px,dy=targetY-py;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      if(dist>6){px+=dx/dist*7;setFacing(dx<0);animLegs(true);}
-      else{
-        behavior='waiting';
-        setTimeout(()=>{
-          px=60+Math.random()*(window.innerWidth-150);
-          py=80+Math.random()*(window.innerHeight-200);
-          clamp();applyPos();pickBehavior();
-        },1800);
-      }
-    }
+    // hiding由setTimeout自行处理，loop里跳过
     clamp();applyPos();
     requestAnimationFrame(loop);
   }
@@ -1633,6 +1628,8 @@ async function deleteLedgerEntry(id){
   window.addEventListener('pointerup',()=>{
     if(isDragging){
       isDragging=false;
+      behavior='idle';bElapsed=0;bDur=2000;
+      svg.style.animation='petBob2 2s ease-in-out infinite';resetLegs();
       setExpr('surprised');
       showBubble('哇！放我下来！',1200);
       setTimeout(()=>setExpr('normal'),1400);
@@ -1645,11 +1642,16 @@ async function deleteLedgerEntry(id){
     clickCount++;
     if(clickCount>=3){
       clickCount=0;
-      behavior='hide';bDur=5000;bElapsed=0;
-      targetX=Math.random()<0.5?-70:window.innerWidth+10;
-      targetY=py;
-      setExpr('shy');svg.style.animation='none';
-      showBubble('找我呀！捉迷藏！',1500);
+      behavior='hiding';bElapsed=0;
+      setExpr('shy');svg.style.animation='none';resetLegs();
+      showBubble('要藏起来咯！',1200);
+      wrap.style.transition='opacity 0.5s';wrap.style.opacity='0';
+      setTimeout(()=>{
+        px=40+Math.random()*(window.innerWidth-160);
+        py=80+Math.random()*(window.innerHeight-200);
+        clamp();applyPos();
+        setTimeout(()=>{wrap.style.opacity='1';setExpr('happy');showBubble('找到我了吗？',2000);setTimeout(()=>{setExpr('normal');wrap.style.transition='';pickBehavior();},2200);},800);
+      },1500);
       return;
     }
     setExpr('happy');
@@ -1660,7 +1662,7 @@ async function deleteLedgerEntry(id){
 
   // 定时说话
   setInterval(()=>{
-    if(isDragging||behavior==='sleep'||behavior==='hide')return;
+    if(isDragging||behavior==='sleep'||behavior==='hiding')return;
     if(Math.random()<0.35){
       const lines=[...(TAB_LINES[getTab()]||[]),...RANDOMS];
       setExpr('happy');
