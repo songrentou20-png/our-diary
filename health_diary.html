@@ -924,6 +924,7 @@ init();
       const dist=Math.sqrt(dx*dx+dy*dy);
       if(dist>6){px+=dx/dist*spd;py+=dy/dist*spd;setFacing(dx<0);animLegs(behavior==='run');}
       else{behavior='idle';bElapsed=bDur;resetLegs();}
+    }
     // hiding由setTimeout自行处理
     clamp();applyPos();
     requestAnimationFrame(loop);
