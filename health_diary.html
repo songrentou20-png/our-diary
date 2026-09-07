@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>思涵的健康日记</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, 'PingFang SC', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5e6f0 0%, #e8d5e8 30%, #d4e8f0 70%, #c8dce8 100%);
+    color: #4a3f4a;
+    padding-bottom: 80px;
+  }
+
+  .glass {
+    background: rgba(255,255,255,0.45);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.6);
+    border-radius: 20px;
+  }
+
+  /* HEADER */
+  .header {
+    padding: 20px 20px 12px;
+    text-align: center;
+  }
+  .header h1 { font-size: 22px; font-weight: 700; color: #6b4c7a; letter-spacing: 0.5px; }
+  .header p { font-size: 13px; color: #9a7aaa; margin-top: 4px; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    margin: 0 16px 16px;
+    padding: 4px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.7);
+    gap: 2px;
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 4px;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    font-size: 12px;
+    color: #9a7aaa;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+  }
+  .tab.active {
+    background: rgba(107,76,122,0.15);
+    color: #6b4c7a;
+    font-weight: 600;
+  }
+
+  /* SECTIONS */
+  .section { display: none; padding: 0 16px; }
+  .section.active { display: block; }
+
+  /* CARDS */
+  .card {
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #6b4c7a;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* GOAL SECTION */
+  .goal-display {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .goal-display .current { font-size: 36px; font-weight: 700; color: #6b4c7a; }
+  .goal-display .unit { font-size: 16px; color: #9a7aaa; }
+  .goal-display .target { font-size: 14px; color: #b8a0c8; margin-left: 8px; }
+
+  .progress-bar {
+    height: 8px;
+    background: rgba(107,76,122,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 6px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c9a0b4, #8eb5d0);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+  .progress-label { font-size: 12px; color: #b8a0c8; text-align: right; }
+
+  /* INPUTS */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1.5px solid rgba(180,160,200,0.3);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.6);
+    font-size: 14px;
+    color: #4a3f4a;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: rgba(107,76,122,0.5);
+  }
+  textarea { resize: none; height: 70px; }
+
+  .btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #c9a0b4, #8eb5d0);
+    color: white;
+  }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .btn-danger {
+    background: rgba(200,100,100,0.15);
+    color: #c06060;
+  }
+
+  /* CHART */
+  canvas { width: 100% !important; border-radius: 8px; }
+
+  /* RECORDS LIST */
+  .record-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(180,160,200,0.15);
+  }
+  .record-item:last-child { border-bottom: none; }
+  .record-date { font-size: 12px; color: #b8a0c8; }
+  .record-value { font-size: 15px; font-weight: 600; color: #6b4c7a; }
+  .record-note { font-size: 12px; color: #9a7aaa; margin-top: 2px; }
+  .record-change { font-size: 12px; }
+  .change-down { color: #7ab87a; }
+  .change-up { color: #c08080; }
+
+  /* EXERCISE */
+  .exercise-item {
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(180,160,200,0.15);
+  }
+  .exercise-item:last-child { border-bottom: none; }
+  .exercise-header { display: flex; justify-content: space-between; align-items: center; }
+  .exercise-name { font-size: 14px; font-weight: 600; color: #6b4c7a; }
+  .exercise-duration { font-size: 12px; color: #9a7aaa; background: rgba(142,181,208,0.2); padding: 2px 8px; border-radius: 8px; }
+  .exercise-date { font-size: 12px; color: #b8a0c8; margin-top: 3px; }
+
+  /* PHOTOS */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .photo-item {
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    aspect-ratio: 3/4;
+  }
+  .photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .photo-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.5));
+    color: white;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+  .photo-delete {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(200,80,80,0.8);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .upload-btn {
+    width: 100%;
+    padding: 30px;
+    border: 2px dashed rgba(107,76,122,0.3);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.3);
+    color: #9a7aaa;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    font-family: inherit;
+    transition: all 0.2s;
+    margin-bottom: 14px;
+  }
+  .upload-btn:active { background: rgba(107,76,122,0.1); }
+
+  /* EMPTY STATE */
+  .empty { text-align: center; padding: 30px; color: #b8a0c8; font-size: 14px; }
+
+  /* SETTINGS */
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(180,160,200,0.15);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-size: 14px; color: #6b4c7a; }
+  .setting-value { font-size: 14px; color: #9a7aaa; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: rgba(107,76,122,0.9);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 13px;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .divider { height: 1px; background: rgba(180,160,200,0.2); margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🌸 健康日记</h1>
+  <p id="headerSub">加载中…</p>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('weight')">⚖️ 体重</button>
+  <button class="tab" onclick="switchTab('exercise')">🏃 运动</button>
+  <button class="tab" onclick="switchTab('photos')">📷 对比</button>
+  <button class="tab" onclick="switchTab('settings')">⚙️ 设置</button>
+</div>
+
+<!-- 体重 -->
+<div class="section active" id="tab-weight">
+  <div class="card glass" id="goalCard">
+    <div class="card-title">🎯 目标进度</div>
+    <div id="goalDisplay" class="empty">还没有设置目标体重哦</div>
+  </div>
+
+  <div class="card glass">
+    <div class="card-title">📝 记录今天</div>
+    <div class="input-row">
+      <input type="number" id="weightInput" placeholder="今天体重 (kg)" step="0.1" min="30" max="200">
+      <input type="date" id="weightDate">
+      <button class="btn btn-primary btn-sm" onclick="addWeight()">记录</button>
+    </div>
+  </div>
+
+  <div class="card glass">
+    <div class="card-title">📈 体重趋势</div>
+    <canvas id="weightChart" height="200"></canvas>
+  </div>
+
+  <div class="card glass">
+    <div class="card-title">📋 历史记录</div>
+    <div id="weightList"><div class="empty">还没有记录</div></div>
+  </div>
+</div>
+
+<!-- 运动 -->
+<div class="section" id="tab-exercise">
+  <div class="card glass">
+    <div class="card-title">➕ 记录运动</div>
+    <div class="input-row">
+      <input type="text" id="activityInput" placeholder="运动类型（平板支撑、散步…）">
+    </div>
+    <div class="input-row">
+      <input type="number" id="durationInput" placeholder="时长（秒）" min="0">
+      <input type="date" id="exerciseDate">
+      <button class="btn btn-primary btn-sm" onclick="addExercise()">记录</button>
+    </div>
+  </div>
+
+  <div class="card glass">
+    <div class="card-title">📋 运动记录</div>
+    <div id="exerciseList"><div class="empty">还没有记录</div></div>
+  </div>
+</div>
+
+<!-- 照片对比 -->
+<div class="section" id="tab-photos">
+  <div class="card glass">
+    <div class="card-title">📷 上传照片</div>
+    <button class="upload-btn" onclick="document.getElementById('photoInput').click()">
+      ＋ 点击选择照片
+    </button>
+    <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
+    <div class="input-row">
+      <input type="date" id="photoDate">
+    </div>
+  </div>
+
+  <div class="card glass">
+    <div class="card-title">🖼️ 照片记录</div>
+    <div class="photo-grid" id="photoGrid">
+      <div class="empty" style="grid-column:1/-1">还没有照片</div>
+    </div>
+  </div>
+</div>
+
+<!-- 设置 -->
+<div class="section" id="tab-settings">
+  <div class="card glass">
+    <div class="card-title">⚙️ 目标设置</div>
+    <div class="input-row">
+      <input type="number" id="targetInput" placeholder="目标体重 (kg)" step="0.1" min="30" max="200">
+      <input type="number" id="startInput" placeholder="起始体重 (kg)" step="0.1" min="30" max="200">
+      <button class="btn btn-primary btn-sm" onclick="saveGoal()">保存</button>
+    </div>
+  </div>
+
+  <div class="card glass">
+    <div class="card-title">📊 当前设置</div>
+    <div id="settingDisplay">
+      <div class="setting-row">
+        <span class="setting-label">起始体重</span>
+        <span class="setting-value" id="showStart">未设置</span>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">目标体重</span>
+        <span class="setting-value" id="showTarget">未设置</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://hxqllfmodimoxnwpudsn.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4cWxsZm1vZGltb3hud3B1ZHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MzkwMzMsImV4cCI6MjEwNDExNTAzM30.GMVFdDvRZVZ_I4swazzRYFbv8RBT8TdgAt_nMay00OA';
+
+const db = async (path, opts = {}) => {
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation',
+      ...opts.headers
+    },
+    ...opts
+  });
+  if (!r.ok && r.status !== 201 && r.status !== 204) return null;
+  try { return await r.json(); } catch { return null; }
+};
+
+const storage = async (file, path) => {
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/health-photos/${path}`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': file.type,
+    },
+    body: file
+  });
+  return r.ok;
+};
+
+let weightData = [];
+let chartInstance = null;
+
+// INIT
+async function init() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('weightDate').value = today;
+  document.getElementById('exerciseDate').value = today;
+  document.getElementById('photoDate').value = today;
+  
+  await loadGoal();
+  await loadWeights();
+  await loadExercises();
+  await loadPhotos();
+}
+
+// GOAL
+async function loadGoal() {
+  const data = await db('health_goals?order=created_at.desc&limit=1');
+  if (data && data.length > 0) {
+    const g = data[0];
+    document.getElementById('showTarget').textContent = g.target_weight ? `${g.target_weight} kg` : '未设置';
+    document.getElementById('showStart').textContent = g.start_weight ? `${g.start_weight} kg` : '未设置';
+    window._goal = g;
+    updateGoalDisplay();
+  }
+}
+
+function updateGoalDisplay() {
+  const g = window._goal;
+  if (!g || !g.target_weight) return;
+  const latest = weightData[0];
+  const current = latest ? latest.weight : (g.start_weight || g.target_weight);
+  const start = g.start_weight || current;
+  const target = g.target_weight;
+  
+  const total = Math.abs(start - target);
+  const done = Math.abs(start - current);
+  const pct = total > 0 ? Math.min(100, Math.round(done / total * 100)) : 0;
+  const diff = (current - target).toFixed(1);
+  
+  document.getElementById('goalDisplay').innerHTML = `
+    <div class="goal-display">
+      <span class="current">${current}</span>
+      <span class="unit">kg</span>
+      <span class="target">目标 ${target} kg</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="progress-label">还差 ${Math.abs(diff)} kg · 完成 ${pct}%</div>
+  `;
+  document.getElementById('headerSub').textContent = `当前 ${current}kg → 目标 ${target}kg`;
+}
+
+async function saveGoal() {
+  const t = parseFloat(document.getElementById('targetInput').value);
+  const s = parseFloat(document.getElementById('startInput').value);
+  if (!t) { showToast('请输入目标体重'); return; }
+  
+  await db('health_goals', {
+    method: 'POST',
+    body: JSON.stringify({ target_weight: t, start_weight: s || null })
+  });
+  showToast('目标已保存 🎯');
+  await loadGoal();
+  if (weightData.length > 0) updateGoalDisplay();
+  document.getElementById('showTarget').textContent = `${t} kg`;
+  if (s) document.getElementById('showStart').textContent = `${s} kg`;
+}
+
+// WEIGHT
+async function loadWeights() {
+  const data = await db('weight_records?order=date.desc&limit=30');
+  weightData = data || [];
+  renderWeightList();
+  renderChart();
+  updateGoalDisplay();
+}
+
+async function addWeight() {
+  const w = parseFloat(document.getElementById('weightInput').value);
+  const d = document.getElementById('weightDate').value;
+  if (!w || !d) { showToast('请填写体重和日期'); return; }
+  
+  await db('weight_records', { method: 'POST', body: JSON.stringify({ weight: w, date: d }) });
+  document.getElementById('weightInput').value = '';
+  showToast('记录成功 ✨');
+  await loadWeights();
+}
+
+function renderWeightList() {
+  const el = document.getElementById('weightList');
+  if (!weightData.length) { el.innerHTML = '<div class="empty">还没有记录</div>'; return; }
+  
+  el.innerHTML = weightData.map((r, i) => {
+    const prev = weightData[i + 1];
+    let changeHtml = '';
+    if (prev) {
+      const diff = (r.weight - prev.weight).toFixed(1);
+      const cls = diff < 0 ? 'change-down' : 'change-up';
+      const sign = diff > 0 ? '+' : '';
+      changeHtml = `<span class="record-change ${cls}">${sign}${diff}</span>`;
+    }
+    return `<div class="record-item">
+      <div>
+        <div class="record-date">${r.date}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${changeHtml}
+        <span class="record-value">${r.weight} kg</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteWeight(${r.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteWeight(id) {
+  await db(`weight_records?id=eq.${id}`, { method: 'DELETE' });
+  await loadWeights();
+}
+
+function renderChart() {
+  const canvas = document.getElementById('weightChart');
+  const ctx = canvas.getContext('2d');
+  
+  if (chartInstance) chartInstance = null;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  if (!weightData.length) { ctx.fillStyle = '#b8a0c8'; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('还没有数据', canvas.width/2, 100); return; }
+  
+  const sorted = [...weightData].reverse();
+  const labels = sorted.map(r => r.date.slice(5));
+  const values = sorted.map(r => r.weight);
+  
+  const W = canvas.offsetWidth || 300;
+  const H = 200;
+  canvas.width = W;
+  canvas.height = H;
+  
+  const pad = { top: 20, right: 20, bottom: 30, left: 40 };
+  const gw = W - pad.left - pad.right;
+  const gh = H - pad.top - pad.bottom;
+  
+  const min = Math.min(...values) - 2;
+  const max = Math.max(...values) + 2;
+  const range = max - min || 1;
+  
+  const x = i => pad.left + (i / (values.length - 1 || 1)) * gw;
+  const y = v => pad.top + (1 - (v - min) / range) * gh;
+  
+  // Grid
+  ctx.strokeStyle = 'rgba(180,160,200,0.15)';
+  ctx.lineWidth = 1;
+  [0, 0.25, 0.5, 0.75, 1].forEach(t => {
+    const yp = pad.top + t * gh;
+    ctx.beginPath(); ctx.moveTo(pad.left, yp); ctx.lineTo(W - pad.right, yp); ctx.stroke();
+    ctx.fillStyle = '#b8a0c8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText((max - t * range).toFixed(1), pad.left - 4, yp + 4);
+  });
+  
+  // Line
+  const grad = ctx.createLinearGradient(0, 0, W, 0);
+  grad.addColorStop(0, '#c9a0b4');
+  grad.addColorStop(1, '#8eb5d0');
+  ctx.strokeStyle = grad;
+  ctx.lineWidth = 2.5;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  values.forEach((v, i) => i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)));
+  ctx.stroke();
+  
+  // Fill
+  ctx.fillStyle = 'rgba(201,160,180,0.12)';
+  ctx.beginPath();
+  values.forEach((v, i) => i === 0 ? ctx.moveTo(x(i), y(v)) : ctx.lineTo(x(i), y(v)));
+  ctx.lineTo(x(values.length-1), H - pad.bottom);
+  ctx.lineTo(x(0), H - pad.bottom);
+  ctx.closePath(); ctx.fill();
+  
+  // Dots
+  values.forEach((v, i) => {
+    ctx.fillStyle = 'white';
+    ctx.beginPath(); ctx.arc(x(i), y(v), 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#c9a0b4';
+    ctx.beginPath(); ctx.arc(x(i), y(v), 2.5, 0, Math.PI * 2); ctx.fill();
+  });
+  
+  // X labels
+  ctx.fillStyle = '#b8a0c8'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  const step = Math.ceil(labels.length / 5);
+  labels.forEach((l, i) => {
+    if (i % step === 0 || i === labels.length - 1) ctx.fillText(l, x(i), H - 8);
+  });
+}
+
+// EXERCISE
+async function loadExercises() {
+  const data = await db('exercise_records?order=date.desc&limit=20');
+  renderExercises(data || []);
+}
+
+function renderExercises(data) {
+  const el = document.getElementById('exerciseList');
+  if (!data.length) { el.innerHTML = '<div class="empty">还没有记录</div>'; return; }
+  
+  el.innerHTML = data.map(r => {
+    const dur = r.duration ? (r.duration >= 60 ? `${Math.floor(r.duration/60)}分${r.duration%60}秒` : `${r.duration}秒`) : '';
+    return `<div class="exercise-item">
+      <div class="exercise-header">
+        <span class="exercise-name">${r.activity}</span>
+        ${dur ? `<span class="exercise-duration">⏱ ${dur}</span>` : ''}
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <span class="exercise-date">${r.date}</span>
+        <button class="btn btn-danger btn-sm" onclick="deleteExercise(${r.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function addExercise() {
+  const a = document.getElementById('activityInput').value.trim();
+  const d = document.getElementById('durationInput').value;
+  const dt = document.getElementById('exerciseDate').value;
+  if (!a || !dt) { showToast('请填写运动类型和日期'); return; }
+  
+  await db('exercise_records', { method: 'POST', body: JSON.stringify({ activity: a, duration: d ? parseInt(d) : null, date: dt }) });
+  document.getElementById('activityInput').value = '';
+  document.getElementById('durationInput').value = '';
+  showToast('运动打卡成功 💪');
+  await loadExercises();
+}
+
+async function deleteExercise(id) {
+  await db(`exercise_records?id=eq.${id}`, { method: 'DELETE' });
+  await loadExercises();
+}
+
+// PHOTOS
+async function loadPhotos() {
+  const data = await db('health_photos?order=date.desc');
+  renderPhotos(data || []);
+}
+
+async function uploadPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const date = document.getElementById('photoDate').value;
+  if (!date) { showToast('请先选择日期'); return; }
+  
+  showToast('上传中…');
+  const path = `${date}_${Date.now()}.jpg`;
+  const ok = await storage(file, path);
+  
+  if (ok) {
+    const url = `${SUPABASE_URL}/storage/v1/object/public/health-photos/${path}`;
+    await db('health_photos', { method: 'POST', body: JSON.stringify({ date, photo_url: url }) });
+    showToast('上传成功 📷');
+    await loadPhotos();
+  } else {
+    showToast('上传失败，可能需要先创建存储桶');
+  }
+  input.value = '';
+}
+
+function renderPhotos(data) {
+  const el = document.getElementById('photoGrid');
+  if (!data.length) { el.innerHTML = '<div class="empty" style="grid-column:1/-1">还没有照片</div>'; return; }
+  
+  el.innerHTML = data.map(r => `
+    <div class="photo-item glass">
+      <img src="${r.photo_url}" alt="${r.date}" loading="lazy">
+      <div class="photo-label">${r.date}</div>
+      <button class="photo-delete" onclick="deletePhoto(${r.id})">✕</button>
+    </div>
+  `).join('');
+}
+
+async function deletePhoto(id) {
+  await db(`health_photos?id=eq.${id}`, { method: 'DELETE' });
+  await loadPhotos();
+}
+
+// UI
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const names = ['weight', 'exercise', 'photos', 'settings'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  if (name === 'weight') renderChart();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+</body>
+</html>
