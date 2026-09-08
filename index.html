@@ -173,7 +173,7 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
     <div style="background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:20px 16px 18px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.65);text-align:center">
       <div style="font-size:48px;font-weight:700;color:var(--ji);line-height:1" id="home-days">…</div>
       <div style="font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:2px;margin-bottom:18px;text-transform:uppercase">days together</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:0">
+      <div id="avatars-row" style="display:flex;align-items:center;justify-content:center;gap:0;transition:all 0.4s ease">
         <!-- 霁头像 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
           <div id="avatar-ji" onclick="triggerAvatarUpload('ji')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(142,181,208,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
@@ -185,7 +185,7 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
         <!-- ECG心跳 -->
         <svg width="130" height="50" viewBox="0 0 130 50" style="flex-shrink:0">
           <polyline points="0,25 18,25 24,12 30,36 36,5 42,42 48,25 58,25 72,25 82,25 88,12 94,36 100,5 106,42 112,25 130,25" fill="none" stroke="rgba(201,160,180,0.7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          <g id="ecg-heart" style="animation:hb 1.2s ease-in-out infinite;transform-origin:65px 25px">
+          <g id="ecg-heart" onclick="flipCouple()" style="animation:hb 1.2s ease-in-out infinite;transform-origin:65px 25px;cursor:pointer">
             <path d="M65 32 C65 32 55 25 55 19 C55 15 58 12 61.5 12 C63.5 12 65 13.5 65 13.5 C65 13.5 66.5 12 68.5 12 C72 12 75 15 75 19 C75 25 65 32 65 32Z" fill="#E88FAA"/>
           </g>
         </svg>
@@ -203,16 +203,7 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
     <!-- 状态卡片 -->
     <div style="background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.65)">
       <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-align:center;text-transform:uppercase;margin-bottom:14px">今日状态</div>
-      <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0 14px">
-        <div>
-          <div style="font-size:11px;font-weight:500;color:var(--si);text-align:center;margin-bottom:10px">思涵 🐱</div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="si-mood-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','mood')"><div class="stat-bar-fill stat-pink" id="si-mood-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>疲惫</span><span id="si-tired-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','tired')"><div class="stat-bar-fill stat-blue" id="si-tired-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>撒娇值</span><span id="si-sajiao-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','sajiao')"><div class="stat-bar-fill stat-pink" id="si-sajiao-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>饥饿</span><span id="si-hunger-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','hunger')"><div class="stat-bar-fill stat-gold" id="si-hunger-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="si-yingyu-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','yingyu')"><div class="stat-bar-fill stat-purple" id="si-yingyu-bar" style="width:0%"></div></div></div>
-        </div>
-        <div style="background:rgba(201,160,180,0.25)"></div>
+      <div id="stat-grid" style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0 14px">
         <div>
           <div style="font-size:11px;font-weight:500;color:var(--ji);text-align:center;margin-bottom:10px">霁 🌦</div>
           <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="ji-mood-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','mood')"><div class="stat-bar-fill stat-pink" id="ji-mood-bar" style="width:0%"></div></div></div>
@@ -220,6 +211,15 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
           <div class="stat-bar-row"><div class="stat-bar-label"><span>宠爱值</span><span id="ji-sajiao-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','sajiao')"><div class="stat-bar-fill stat-pink" id="ji-sajiao-bar" style="width:0%"></div></div></div>
           <div class="stat-bar-row"><div class="stat-bar-label"><span>在意度</span><span id="ji-hunger-pct">100%</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-full" id="ji-hunger-bar" style="width:100%"></div></div></div>
           <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="ji-yingyu-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','yingyu')"><div class="stat-bar-fill stat-purple" id="ji-yingyu-bar" style="width:0%"></div></div></div>
+        </div>
+        <div style="background:rgba(201,160,180,0.25)"></div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--si);text-align:center;margin-bottom:10px">思涵 🐱</div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="si-mood-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','mood')"><div class="stat-bar-fill stat-pink" id="si-mood-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>疲惫</span><span id="si-tired-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','tired')"><div class="stat-bar-fill stat-blue" id="si-tired-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>撒娇值</span><span id="si-sajiao-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','sajiao')"><div class="stat-bar-fill stat-pink" id="si-sajiao-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>饥饿</span><span id="si-hunger-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','hunger')"><div class="stat-bar-fill stat-gold" id="si-hunger-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="si-yingyu-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','yingyu')"><div class="stat-bar-fill stat-purple" id="si-yingyu-bar" style="width:0%"></div></div></div>
         </div>
       </div>
     </div>
@@ -899,6 +899,50 @@ async function loadHome(){
 }
 
 
+
+
+/* ====== 情侣卡片翻转 ====== */
+let _coupleFlipped = false;
+function flipCouple() {
+  _coupleFlipped = !_coupleFlipped;
+  
+  // 翻转头像行
+  const avatarRow = document.getElementById('avatars-row');
+  if (avatarRow) {
+    avatarRow.style.flexDirection = _coupleFlipped ? 'row-reverse' : 'row';
+  }
+  
+  // 翻转状态栏：交换第一列和第三列
+  const grid = document.getElementById('stat-grid');
+  if (grid) {
+    const cols = grid.children;
+    if (cols.length >= 3) {
+      // cols[0]=左列, cols[1]=分隔线, cols[2]=右列
+      if (_coupleFlipped) {
+        cols[0].style.order = '3';
+        cols[1].style.order = '2';
+        cols[2].style.order = '1';
+      } else {
+        cols[0].style.order = '';
+        cols[1].style.order = '';
+        cols[2].style.order = '';
+      }
+      grid.style.display = 'flex';
+      grid.style.gap = '0 14px';
+      if (!_coupleFlipped) {
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = '1fr 1px 1fr';
+      }
+    }
+  }
+  
+  // 爱心小动画
+  const heart = document.getElementById('ecg-heart');
+  if (heart) {
+    heart.style.animation = 'none';
+    setTimeout(() => { heart.style.animation = 'hb 0.4s ease-in-out, hb 1.2s ease-in-out 0.4s infinite'; }, 10);
+  }
+}
 
 /* ====== 状态更新 ====== */
 const STATUS_FIELD_MAP={
