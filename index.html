@@ -118,7 +118,7 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
 @keyframes hb{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}50%{transform:scale(1)}65%{transform:scale(1.18)}80%{transform:scale(1)}}
 .stat-bar-row{margin-bottom:8px}
 .stat-bar-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:3px}
-.stat-bar-track{height:5px;background:rgba(201,160,180,0.2);border-radius:10px;overflow:hidden}
+.stat-bar-track{height:10px;background:rgba(201,160,180,0.2);border-radius:10px;overflow:hidden;cursor:pointer}
 .stat-bar-fill{height:100%;border-radius:10px;transition:width 0.6s ease}
 .stat-pink{background:linear-gradient(90deg,#E88FAA,#C9A0B4)}
 .stat-blue{background:linear-gradient(90deg,#8EB5D0,#a8cce0)}
@@ -206,20 +206,20 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
       <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0 14px">
         <div>
           <div style="font-size:11px;font-weight:500;color:var(--si);text-align:center;margin-bottom:10px">思涵 🐱</div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="si-mood-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="si-mood-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>疲惫</span><span id="si-tired-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-blue" id="si-tired-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>撒娇值</span><span id="si-sajiao-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="si-sajiao-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>饥饿</span><span id="si-hunger-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-gold" id="si-hunger-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="si-yingyu-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-purple" id="si-yingyu-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="si-mood-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','mood')"><div class="stat-bar-fill stat-pink" id="si-mood-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>疲惫</span><span id="si-tired-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','tired')"><div class="stat-bar-fill stat-blue" id="si-tired-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>撒娇值</span><span id="si-sajiao-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','sajiao')"><div class="stat-bar-fill stat-pink" id="si-sajiao-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>饥饿</span><span id="si-hunger-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','hunger')"><div class="stat-bar-fill stat-gold" id="si-hunger-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="si-yingyu-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'si','yingyu')"><div class="stat-bar-fill stat-purple" id="si-yingyu-bar" style="width:0%"></div></div></div>
         </div>
         <div style="background:rgba(201,160,180,0.25)"></div>
         <div>
           <div style="font-size:11px;font-weight:500;color:var(--ji);text-align:center;margin-bottom:10px">霁 🌦</div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="ji-mood-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="ji-mood-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>想你</span><span id="ji-tired-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-blue" id="ji-tired-bar" style="width:0%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>宠爱值</span><span id="ji-sajiao-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="ji-sajiao-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="ji-mood-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','mood')"><div class="stat-bar-fill stat-pink" id="ji-mood-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>想你</span><span id="ji-tired-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','tired')"><div class="stat-bar-fill stat-blue" id="ji-tired-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>宠爱值</span><span id="ji-sajiao-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','sajiao')"><div class="stat-bar-fill stat-pink" id="ji-sajiao-bar" style="width:0%"></div></div></div>
           <div class="stat-bar-row"><div class="stat-bar-label"><span>在意度</span><span id="ji-hunger-pct">100%</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-full" id="ji-hunger-bar" style="width:100%"></div></div></div>
-          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="ji-yingyu-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-purple" id="ji-yingyu-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="ji-yingyu-pct">—</span></div><div class="stat-bar-track" onclick="updateStat(event,'ji','yingyu')"><div class="stat-bar-fill stat-purple" id="ji-yingyu-bar" style="width:0%"></div></div></div>
         </div>
       </div>
     </div>
@@ -908,6 +908,39 @@ async function loadHome(){
   });
 }
 
+
+
+/* ====== 状态更新 ====== */
+const STATUS_FIELD_MAP={
+  'si':{'mood':'mood','tired':'tired','sajiao':'sajiao','hunger':'hunger','yingyu':'yingyu'},
+  'ji':{'mood':'mood','tired':'tired','sajiao':'sajiao','yingyu':'yingyu'}
+};
+async function updateStat(e, who, field){
+  const track = e.currentTarget;
+  const rect = track.getBoundingClientRect();
+  const pct = Math.round(Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100)));
+  // 更新UI
+  const bar = document.getElementById(who+'-'+field+'-bar');
+  const pctEl = document.getElementById(who+'-'+field+'-pct');
+  if(bar) bar.style.width = pct + '%';
+  if(pctEl) pctEl.textContent = pct + '%';
+  // 保存到Supabase
+  const author = who === 'ji' ? 'ji' : 'sihan';
+  const dbField = field;
+  const body = {};
+  body[dbField] = pct;
+  body['updated_at'] = new Date().toISOString();
+  try {
+    await fetch(SB+'/rest/v1/user_status?author=eq.'+author, {
+      method: 'PATCH',
+      headers: {...H, 'Content-Type':'application/json', 'Prefer':'return=minimal'},
+      body: JSON.stringify(body)
+    });
+    showToast('已更新 ✓');
+  } catch(err) {
+    showToast('保存失败');
+  }
+}
 
 /* ====== 头像上传 ====== */
 let _avatarTarget='';
