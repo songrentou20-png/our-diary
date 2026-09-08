@@ -820,16 +820,6 @@ async function loadHome(){
     if(Array.isArray(all)){
       const jiE=all.find(e=>e.author==='ji'&&e.mood);
       const siE=all.find(e=>e.author==='sihan'&&e.mood);
-      const setMood=(faceEl,labelEl,entry)=>{
-        if(!entry)return;
-        const m=MOODS.find(x=>x.id===entry.mood);
-        if(m){
-          faceEl.innerHTML=`<svg viewBox="0 0 60 60" width="28" height="28">${m.svg}</svg>`;
-          labelEl.textContent=m.label;
-        }
-      };
-      setMood(document.getElementById('home-ji-mood-face'),document.getElementById('home-ji-mood-label'),jiE);
-      setMood(document.getElementById('home-si-mood-face'),document.getElementById('home-si-mood-label'),siE);
       // 最近日记
       const latest=all[0];
       if(latest){
