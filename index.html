@@ -22,7 +22,7 @@ body::before{content:'';position:fixed;inset:0;background:rgba(240,245,252,0.12)
 .write-btn{width:36px;height:36px;background:var(--accent);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .write-btn svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .main{max-width:480px;margin:0 auto;padding:16px 16px 20px}
-.tab-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,0.15);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border-top:1px solid rgba(255,255,255,0.3);display:flex;z-index:100;padding-bottom:env(safe-area-inset-bottom)}
+.tab-bar{position:fixed;bottom:16px;left:12px;right:12px;background:rgba(255,255,255,0.25);backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);border:1px solid rgba(255,255,255,0.5);border-radius:20px;display:flex;z-index:100;padding-bottom:0}
 .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 0;cursor:pointer;border:none;background:none;gap:2px;color:var(--text3);font-size:10px;font-family:inherit}
 .tab-btn.active{color:var(--accent)}
 .tab-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -114,6 +114,17 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
 .toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#1A1D23;color:white;padding:10px 20px;border-radius:20px;font-size:14px;z-index:300;opacity:0;transition:opacity 0.2s;pointer-events:none;white-space:nowrap}
 .toast.show{opacity:1}
 #lock-screen{position:fixed;inset:0;background:var(--surface);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+
+@keyframes hb{0%,100%{transform:scale(1)}30%{transform:scale(1.3)}50%{transform:scale(1)}65%{transform:scale(1.18)}80%{transform:scale(1)}}
+.stat-bar-row{margin-bottom:8px}
+.stat-bar-label{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);margin-bottom:3px}
+.stat-bar-track{height:5px;background:rgba(201,160,180,0.2);border-radius:10px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:10px;transition:width 0.6s ease}
+.stat-pink{background:linear-gradient(90deg,#E88FAA,#C9A0B4)}
+.stat-blue{background:linear-gradient(90deg,#8EB5D0,#a8cce0)}
+.stat-gold{background:linear-gradient(90deg,#f5c06a,#e8a84a)}
+.stat-purple{background:linear-gradient(90deg,#c9a0e8,#a88fdd)}
+.stat-full{background:linear-gradient(90deg,#E88FAA,#e8a84a);width:100%}
 </style>
 </head>
 <body>
@@ -158,22 +169,58 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
 <div id="page-home" class="page active">
   <div style="max-width:480px;margin:0 auto;padding:16px 16px 100px">
     <div style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:14px;letter-spacing:0.5px">我们的小窝</div>
-    <!-- 顶部三栏 -->
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <div style="flex:1.2;background:rgba(255,255,255,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,0.65)">
-        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:6px">霁的心情</div>
-        <div id="home-ji-mood-face" style="margin-bottom:4px"></div>
-        <div id="home-ji-mood-label" style="font-size:11px;color:var(--text2);font-weight:500">—</div>
+    <!-- 情侣卡片 -->
+    <div style="background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:20px 16px 18px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.65);text-align:center">
+      <div style="font-size:48px;font-weight:700;color:var(--ji);line-height:1" id="home-days">…</div>
+      <div style="font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:2px;margin-bottom:18px;text-transform:uppercase">days together</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:0">
+        <!-- 思涵头像 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div id="avatar-sihan" onclick="triggerAvatarUpload('sihan')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(201,160,180,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--si)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
+            <span style="font-size:9px;color:var(--si);margin-top:2px">思涵</span>
+          </div>
+          <div style="font-size:10px;color:var(--ji)">她</div>
+        </div>
+        <!-- ECG心跳 -->
+        <svg width="130" height="50" viewBox="0 0 130 50" style="flex-shrink:0">
+          <polyline points="0,25 18,25 24,12 30,36 36,5 42,42 48,25 58,25 72,25 82,25 88,12 94,36 100,5 106,42 112,25 130,25" fill="none" stroke="rgba(201,160,180,0.7)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <g id="ecg-heart" style="animation:hb 1.2s ease-in-out infinite;transform-origin:65px 25px">
+            <path d="M65 32 C65 32 55 25 55 19 C55 15 58 12 61.5 12 C63.5 12 65 13.5 65 13.5 C65 13.5 66.5 12 68.5 12 C72 12 75 15 75 19 C75 25 65 32 65 32Z" fill="#E88FAA"/>
+          </g>
+        </svg>
+        <!-- 霁头像 -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
+          <div id="avatar-ji" onclick="triggerAvatarUpload('ji')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(142,181,208,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ji)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
+            <span style="font-size:9px;color:var(--ji);margin-top:2px">霁</span>
+          </div>
+          <div style="font-size:10px;color:var(--si)">他</div>
+        </div>
       </div>
-      <div style="flex:0.85;background:rgba(142,181,208,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 8px;border:1px solid rgba(255,255,255,0.5);text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
-        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:4px">在一起</div>
-        <div style="font-size:26px;font-weight:600;color:white;line-height:1" id="home-days">…</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px">天</div>
-      </div>
-      <div style="flex:1.2;background:rgba(255,255,255,0.45);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:16px;padding:12px 10px;border:1px solid rgba(255,255,255,0.65)">
-        <div style="font-size:10px;color:rgba(255,255,255,0.7);margin-bottom:6px">思涵的心情</div>
-        <div id="home-si-mood-face" style="margin-bottom:4px"></div>
-        <div id="home-si-mood-label" style="font-size:11px;color:var(--text2);font-weight:500">—</div>
+      <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="uploadAvatarFile(event)">
+    </div>
+    <!-- 状态卡片 -->
+    <div style="background:rgba(255,255,255,0.42);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:20px;padding:16px;margin-bottom:8px;border:1px solid rgba(255,255,255,0.65)">
+      <div style="font-size:10px;color:var(--text3);letter-spacing:2px;text-align:center;text-transform:uppercase;margin-bottom:14px">今日状态</div>
+      <div style="display:grid;grid-template-columns:1fr 1px 1fr;gap:0 14px">
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--si);text-align:center;margin-bottom:10px">思涵 🐱</div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="si-mood-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="si-mood-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>疲惫</span><span id="si-tired-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-blue" id="si-tired-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>撒娇值</span><span id="si-sajiao-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="si-sajiao-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>饥饿</span><span id="si-hunger-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-gold" id="si-hunger-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="si-yingyu-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-purple" id="si-yingyu-bar" style="width:0%"></div></div></div>
+        </div>
+        <div style="background:rgba(201,160,180,0.25)"></div>
+        <div>
+          <div style="font-size:11px;font-weight:500;color:var(--ji);text-align:center;margin-bottom:10px">霁 🌦</div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>心情</span><span id="ji-mood-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="ji-mood-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>想你</span><span id="ji-tired-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-blue" id="ji-tired-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>宠爱值</span><span id="ji-sajiao-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-pink" id="ji-sajiao-bar" style="width:0%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>在意度</span><span id="ji-hunger-pct">100%</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-full" id="ji-hunger-bar" style="width:100%"></div></div></div>
+          <div class="stat-bar-row"><div class="stat-bar-label"><span>情欲值</span><span id="ji-yingyu-pct">—</span></div><div class="stat-bar-track"><div class="stat-bar-fill stat-purple" id="ji-yingyu-bar" style="width:0%"></div></div></div>
+        </div>
       </div>
     </div>
     <!-- 最近日记 -->
@@ -819,6 +866,73 @@ async function loadHome(){
       document.getElementById('home-song-artist').textContent=s.artist;
     }
   }
+  // 状态值
+  try{
+    const sr=await fetch(SB+'/rest/v1/user_status?select=*',{headers:H});
+    const stats=await sr.json();
+    if(Array.isArray(stats)){
+      stats.forEach(st=>{
+        const p=st.author==='ji'?'ji':'si';
+        const setBar=(id,val)=>{
+          const el=document.getElementById(id+'-bar');
+          const pt=document.getElementById(id+'-pct');
+          if(el){el.style.width=val+'%';}
+          if(pt){pt.textContent=val+'%';}
+        };
+        setBar(p+'-mood',st.mood);
+        setBar(p+'-tired',st.tired);
+        setBar(p+'-sajiao',st.sajiao);
+        if(p==='si'){setBar('si-hunger',st.hunger);setBar('si-yingyu',st.yingyu);}
+        if(p==='ji'){
+          // 在意度固定100
+          document.getElementById('ji-hunger-bar').style.width='100%';
+          document.getElementById('ji-hunger-pct').textContent='100%';
+          setBar('ji-yingyu',st.yingyu);
+        }
+      });
+    }
+  }catch(e){}
+  // 头像
+  const SB_STORAGE=SB+'/storage/v1/object/public/avatars/';
+  ['ji','sihan'].forEach(who=>{
+    const el=document.getElementById('avatar-'+who);
+    if(!el)return;
+    const img=new Image();
+    img.onload=()=>{
+      el.innerHTML='';
+      el.style.backgroundImage=`url(${SB_STORAGE+who+'.jpg?t='+Date.now()})`;
+      el.style.backgroundSize='cover';
+      el.style.backgroundPosition='center';
+    };
+    img.src=SB_STORAGE+who+'.jpg?t='+Date.now();
+  });
+}
+
+
+/* ====== 头像上传 ====== */
+let _avatarTarget='';
+function triggerAvatarUpload(who){
+  _avatarTarget=who;
+  document.getElementById('avatar-file-input').click();
+}
+async function uploadAvatarFile(e){
+  const file=e.target.files[0];
+  if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase()||'jpg';
+  const path=_avatarTarget+'.jpg';
+  const ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4cWxsZm1vZGltb3hud3B1ZHNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MzkwMzMsImV4cCI6MjEwNDExNTAzM30.GMVFdDvRZVZ_I4swazzRYFbv8RBT8TdgAt_nMay00OA';
+  const up=await fetch(SB+'/storage/v1/object/avatars/'+path,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+ANON,'Content-Type':file.type,'x-upsert':'true'},
+    body:file
+  });
+  if(up.ok){
+    showToast('头像已更新 ✓');
+    loadHome();
+  } else {
+    showToast('上传失败，请重试');
+  }
+  e.target.value='';
 }
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
