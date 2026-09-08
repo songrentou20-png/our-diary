@@ -174,13 +174,13 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
       <div style="font-size:48px;font-weight:700;color:var(--ji);line-height:1" id="home-days">…</div>
       <div style="font-size:10px;color:var(--text3);letter-spacing:2px;margin-top:2px;margin-bottom:18px;text-transform:uppercase">days together</div>
       <div style="display:flex;align-items:center;justify-content:center;gap:0">
-        <!-- 思涵头像 -->
+        <!-- 霁头像 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <div id="avatar-sihan" onclick="triggerAvatarUpload('sihan')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(201,160,180,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--si)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
-            <span style="font-size:9px;color:var(--si);margin-top:2px">思涵</span>
+          <div id="avatar-ji" onclick="triggerAvatarUpload('ji')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(142,181,208,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ji)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
+            <span style="font-size:9px;color:var(--ji);margin-top:2px">霁</span>
           </div>
-          <div style="font-size:10px;color:var(--ji)">她</div>
+          <div style="font-size:10px;color:var(--si)">他</div>
         </div>
         <!-- ECG心跳 -->
         <svg width="130" height="50" viewBox="0 0 130 50" style="flex-shrink:0">
@@ -189,13 +189,13 @@ textarea:focus{border-color:var(--accent);background:var(--surface)}
             <path d="M65 32 C65 32 55 25 55 19 C55 15 58 12 61.5 12 C63.5 12 65 13.5 65 13.5 C65 13.5 66.5 12 68.5 12 C72 12 75 15 75 19 C75 25 65 32 65 32Z" fill="#E88FAA"/>
           </g>
         </svg>
-        <!-- 霁头像 -->
+        <!-- 思涵头像 -->
         <div style="display:flex;flex-direction:column;align-items:center;gap:6px">
-          <div id="avatar-ji" onclick="triggerAvatarUpload('ji')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(142,181,208,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--ji)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
-            <span style="font-size:9px;color:var(--ji);margin-top:2px">霁</span>
+          <div id="avatar-sihan" onclick="triggerAvatarUpload('sihan')" style="width:68px;height:68px;border-radius:50%;border:2.5px solid rgba(201,160,180,0.6);background:rgba(255,255,255,0.5);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--si)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
+            <span style="font-size:9px;color:var(--si);margin-top:2px">思涵</span>
           </div>
-          <div style="font-size:10px;color:var(--si)">他</div>
+          <div style="font-size:10px;color:var(--ji)">她</div>
         </div>
       </div>
       <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="uploadAvatarFile(event)">
