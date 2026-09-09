@@ -324,6 +324,25 @@
     </div>
   </div>
 
+  <!-- 体重统计三卡片 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:0">
+    <div class="card glass" style="padding:12px 10px;text-align:center">
+      <div style="font-size:10px;color:#9abea2;margin-bottom:4px">实际瘦了</div>
+      <div id="stat-net" style="font-size:20px;font-weight:700;color:#7ec8a4">—</div>
+      <div style="font-size:9px;color:#aaa;margin-top:2px">kg</div>
+    </div>
+    <div class="card glass" style="padding:12px 10px;text-align:center">
+      <div style="font-size:10px;color:#9abea2;margin-bottom:4px">总共瘦了</div>
+      <div id="stat-lost" style="font-size:20px;font-weight:700;color:#7ec8a4">—</div>
+      <div style="font-size:9px;color:#aaa;margin-top:2px">kg</div>
+    </div>
+    <div class="card glass" style="padding:12px 10px;text-align:center">
+      <div style="font-size:10px;color:#e8a4a4;margin-bottom:4px">总共胖了</div>
+      <div id="stat-gained" style="font-size:20px;font-weight:700;color:#e8a4a4">—</div>
+      <div style="font-size:9px;color:#aaa;margin-top:2px">kg</div>
+    </div>
+  </div>
+
   <div class="card glass">
     <div class="card-title">📈 体重趋势</div>
     <canvas id="weightChart" height="200"></canvas>
@@ -511,6 +530,7 @@ async function loadWeights() {
   weightData = data || [];
   renderWeightList();
   renderChart();
+  updateWeightStats();
   updateGoalDisplay();
 }
 
@@ -556,6 +576,37 @@ async function deleteWeight(id) {
   await loadWeights();
 }
 
+
+function updateWeightStats() {
+  if (!weightData.length) return;
+  const sorted = [...weightData].sort((a,b) => a.date.localeCompare(b.date));
+  const first = sorted[0].weight;
+  const last = sorted[sorted.length-1].weight;
+  
+  // 实际净变化
+  const net = +(first - last).toFixed(2);
+  const netEl = document.getElementById('stat-net');
+  if (netEl) {
+    netEl.textContent = net > 0 ? '+' + net : net;
+    netEl.style.color = net > 0 ? '#7ec8a4' : '#e8a4a4';
+    // 正数=瘦了，负数=胖了
+    netEl.closest('.card').querySelector('div').textContent = net >= 0 ? '实际瘦了' : '实际胖了';
+  }
+  
+  // 总共瘦了（累计下降）
+  let totalLost = 0;
+  let totalGained = 0;
+  for (let i = 1; i < sorted.length; i++) {
+    const diff = sorted[i-1].weight - sorted[i].weight;
+    if (diff > 0) totalLost += diff;
+    else totalGained += Math.abs(diff);
+  }
+  const lostEl = document.getElementById('stat-lost');
+  if (lostEl) lostEl.textContent = totalLost.toFixed(2);
+  const gainedEl = document.getElementById('stat-gained');
+  if (gainedEl) gainedEl.textContent = totalGained.toFixed(2);
+}
+
 function renderChart() {
   const canvas = document.getElementById('weightChart');
   const ctx = canvas.getContext('2d');
@@ -569,10 +620,14 @@ function renderChart() {
   const labels = sorted.map(r => r.date.slice(5));
   const values = sorted.map(r => r.weight);
   
+  const dpr = window.devicePixelRatio || 1;
   const W = canvas.offsetWidth || 300;
   const H = 200;
-  canvas.width = W;
-  canvas.height = H;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.scale(dpr, dpr);
   
   const pad = { top: 20, right: 20, bottom: 30, left: 40 };
   const gw = W - pad.left - pad.right;
@@ -614,12 +669,27 @@ function renderChart() {
   ctx.lineTo(x(0), H - pad.bottom);
   ctx.closePath(); ctx.fill();
   
-  // Dots
+  // Dots + 差值标注
   values.forEach((v, i) => {
     ctx.fillStyle = 'white';
     ctx.beginPath(); ctx.arc(x(i), y(v), 4, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = '#c9a0b4';
     ctx.beginPath(); ctx.arc(x(i), y(v), 2.5, 0, Math.PI * 2); ctx.fill();
+    
+    // 差值标注（与前一个点相比）
+    if (i > 0) {
+      const diff = +(v - values[i-1]).toFixed(2);
+      if (diff !== 0) {
+        const sign = diff > 0 ? '+' : '';
+        const labelColor = diff < 0 ? '#7ec8a4' : '#e8a4a4'; // 减=绿，增=红
+        ctx.fillStyle = labelColor;
+        ctx.font = 'bold 9px sans-serif';
+        ctx.textAlign = 'center';
+        // 标注在节点上方
+        const labelY = y(v) - 10;
+        ctx.fillText(sign + diff, x(i), labelY < pad.top + 8 ? y(v) + 16 : labelY);
+      }
+    }
   });
   
   // X labels
@@ -726,7 +796,7 @@ function switchTab(name) {
   });
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(`tab-${name}`).classList.add('active');
-  if (name === 'weight') renderChart();
+  if (name === 'weight') { renderChart(); updateWeightStats(); }
 }
 
 function showToast(msg) {
