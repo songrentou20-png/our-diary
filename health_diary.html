@@ -587,7 +587,7 @@ function updateWeightStats() {
   const net = +(first - last).toFixed(2);
   const netEl = document.getElementById('stat-net');
   if (netEl) {
-    netEl.textContent = net > 0 ? '+' + net : net;
+    netEl.textContent = net;
     netEl.style.color = net > 0 ? '#7ec8a4' : '#e8a4a4';
     // 正数=瘦了，负数=胖了
     netEl.closest('.card').querySelector('div').textContent = net >= 0 ? '实际瘦了' : '实际胖了';
