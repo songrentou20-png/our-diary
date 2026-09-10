@@ -362,7 +362,7 @@
       <input type="text" id="activityInput" placeholder="运动类型（平板支撑、散步…）">
     </div>
     <div class="input-row">
-      <input type="number" id="durationInput" placeholder="时长（秒）" min="0">
+      <input type="number" id="durationInput" placeholder="时长（分钟）" min="0">
       <input type="date" id="exerciseDate">
       <button class="btn btn-primary btn-sm" onclick="addExercise()">记录</button>
     </div>
@@ -711,7 +711,7 @@ function renderExercises(data) {
   if (!data.length) { el.innerHTML = '<div class="empty">还没有记录</div>'; return; }
   
   el.innerHTML = data.map(r => {
-    const dur = r.duration ? (r.duration >= 60 ? `${Math.floor(r.duration/60)}分${r.duration%60}秒` : `${r.duration}秒`) : '';
+    const dur = r.duration ? `${r.duration}分钟` : '';
     return `<div class="exercise-item">
       <div class="exercise-header">
         <span class="exercise-name">${r.activity}</span>
