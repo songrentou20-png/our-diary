@@ -187,6 +187,8 @@
   .change-up { color: #c08080; }
 
   /* EXERCISE */
+  .exercise-group { margin-bottom: 12px; }
+  .exercise-group-date { font-size: 13px; font-weight: 600; color: #3d6b4a; padding: 6px 0 4px; border-bottom: 1px solid rgba(90,168,138,0.25); margin-bottom: 4px; }
   .exercise-item {
     padding: 10px 0;
     border-bottom: 1px solid rgba(140,180,150,0.15);
@@ -710,18 +712,27 @@ function renderExercises(data) {
   const el = document.getElementById('exerciseList');
   if (!data.length) { el.innerHTML = '<div class="empty">还没有记录</div>'; return; }
   
-  el.innerHTML = data.map(r => {
-    const dur = r.duration ? `${r.duration}分钟` : '';
-    return `<div class="exercise-item">
-      <div class="exercise-header">
-        <span class="exercise-name">${r.activity}</span>
-        ${dur ? `<span class="exercise-duration">⏱ ${dur}</span>` : ''}
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        <span class="exercise-date">${r.date}</span>
-        <button class="btn btn-danger btn-sm" onclick="deleteExercise(${r.id})">✕</button>
-      </div>
-    </div>`;
+  const groups = {};
+  data.forEach(r => {
+    if (!groups[r.date]) groups[r.date] = [];
+    groups[r.date].push(r);
+  });
+  const sortedDates = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+  
+  el.innerHTML = sortedDates.map(date => {
+    const items = groups[date].map(r => {
+      const dur = r.duration ? `${r.duration}分钟` : '';
+      return `<div class="exercise-item">
+        <div class="exercise-header">
+          <span class="exercise-name">${r.activity}</span>
+          ${dur ? `<span class="exercise-duration">⏱ ${dur}</span>` : ''}
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px">
+          <button class="btn btn-danger btn-sm" onclick="deleteExercise(${r.id})">✕</button>
+        </div>
+      </div>`;
+    }).join('');
+    return `<div class="exercise-group"><div class="exercise-group-date">📅 ${date}</div>${items}</div>`;
   }).join('');
 }
 
